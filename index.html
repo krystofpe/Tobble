@@ -2,142 +2,324 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Symbol Duel</title>
+<meta name="theme-color" content="#1F3B31">
+<meta name="description" content="Tobble: a cozy spot-the-match card game for friends.">
+<title>Tobble</title>
+<link rel="icon" href="assets/symbols/mushroom.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/fredoka-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/nunito-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Fonts: Fredoka and Nunito, self-hosted (assets/fonts, SIL Open Font License). */
+@font-face{ font-family:'Fredoka'; font-style:normal; font-display:swap; font-weight:300 700;
+  src:url(assets/fonts/fredoka-latin-ext-wght-normal.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face{ font-family:'Fredoka'; font-style:normal; font-display:swap; font-weight:300 700;
+  src:url(assets/fonts/fredoka-latin-wght-normal.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face{ font-family:'Nunito'; font-style:normal; font-display:swap; font-weight:200 1000;
+  src:url(assets/fonts/nunito-latin-ext-wght-normal.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face{ font-family:'Nunito'; font-style:normal; font-display:swap; font-weight:200 1000;
+  src:url(assets/fonts/nunito-latin-wght-normal.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+/* Design tokens: docs/design/tokens.css, unchanged. */
 :root{
-  --bg:#f3efe6; --surface:#fffdf8; --ink:#1c2230; --muted:#5f6878; --line:#1c2230; --soft:#e8e1d2;
-  --accent:#0e7c6b; --accent-ink:#ffffff; --tint:#dff1ec; --warn:#c8401f; --ok:#1f9d6b; --gold:#f0b429; --card:#fffdf8;
+  --felt:#1F3B31; --felt-dot:rgba(255,240,215,0.045); --panel:#2A4A3E; --panel-raised:#34584A; --line:#3E6152; --line-strong:#5E8172;
+  --text:#FBF1DE; --text-soft:#C9D8CD; --text-muted:#B9CCBF; --placeholder:#9FB8A9;
+  --card:#FFF8EC; --card-edge:#D8C29C; --card-stitch:#E8D6B4; --ink:#2A1D14;
+  --honey:#F2B54A; --honey-edge:#B9822A; --honey-tint:rgba(242,181,74,0.16); --honey-on-tint:#F7C96F;
+  --coral:#F09A84; --coral-tint:rgba(240,154,132,0.16); --coral-on-tint:#F8BFAE;
+  --miss:#D9693F; --miss-toast:#EFA184; --ok:#B5DDBF; --ok-tint:rgba(127,168,138,0.2);
+  --font-display:'Fredoka', system-ui, sans-serif; --font-body:'Nunito', system-ui, sans-serif;
+  --fs-hero:52px; --fs-h1-result:46px; --fs-h1:24px; --fs-button:20px; --fs-body:17px; --fs-label:14px; --fs-small:13px; --fs-caption:12px;
+  --radius-button:18px; --radius-panel:18px; --radius-panel-lg:24px; --radius-input:16px; --radius-chip:999px;
+  --button-height:58px; --input-height:56px; --tap-min:44px;
+  --shadow-card:0 6px 0 var(--card-edge), 0 16px 28px rgba(8,20,15,0.45);
+  --shadow-tile:0 5px 0 var(--card-edge);
+  --shadow-button:0 4px 0 var(--honey-edge);
+  --ease-bounce:cubic-bezier(0.2,0.8,0.2,1.15); --ease-out:cubic-bezier(0.25,0.8,0.25,1);
+  --dur-deal:420ms; --dur-slide:520ms; --dur-shake:380ms; --dur-toast:260ms; --dur-press:120ms;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#141821; --surface:#1e2431; --ink:#f1ede4; --muted:#a2abbb; --line:#07090d; --soft:#2c3345;
-    --accent:#35bfa6; --accent-ink:#04211c; --tint:#1b3a38; --warn:#ff8466; --ok:#35c48b; --gold:#f5c451; --card:#f7f2e7;
-  }
-}
+@media (prefers-reduced-motion:reduce){ :root{ --dur-deal:1ms; --dur-slide:1ms; --dur-shake:1ms; --dur-toast:1ms; } }
+
+/* ── base ── */
 *{ box-sizing:border-box; }
-html{ -webkit-text-size-adjust:100%; }
-body{ margin:0; background:var(--bg); color:var(--ink);
-  font:16px/1.45 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,-apple-system,sans-serif; }
+html{ -webkit-text-size-adjust:100%; background-color:var(--felt); }
+body{ margin:0; min-height:100vh; min-height:100dvh; color:var(--text); font:var(--fs-body)/1.45 var(--font-body);
+  background-color:var(--felt); background-image:radial-gradient(var(--felt-dot) 1px, transparent 1.4px); background-size:7px 7px; }
 button,input{ font:inherit; color:inherit; }
-h1{ font-size:1.5rem; line-height:1.2; margin:0 0 6px; letter-spacing:-.01em; }
-h2{ font-size:1.05rem; line-height:1.25; margin:0 0 12px; }
-p{ margin:0 0 10px; }
-.muted{ color:var(--muted); }
-.small{ font-size:.875rem; }
-.shell{ max-width:980px; margin:0 auto; padding:20px 16px 56px; }
-.narrow{ max-width:460px; margin:8vh auto 0; }
+h1,h2,h3,p{ margin:0; }
+img{ display:block; }
+a{ color:var(--honey); } a:hover{ color:var(--honey-on-tint); }
+:focus-visible{ outline:3px solid var(--honey); outline-offset:3px; }
+.display{ font-family:var(--font-display); }
+.label{ font-weight:800; font-size:var(--fs-label); letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); }
+.caption{ font-weight:800; font-size:var(--fs-caption); letter-spacing:1.2px; text-transform:uppercase; color:var(--text-muted); text-align:center; }
+.soft{ color:var(--text-soft); } .muted{ color:var(--text-muted); } .small{ font-size:var(--fs-small); }
+.ell{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 
-.top{ display:flex; align-items:center; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; margin-bottom:18px; }
-.brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.25rem; letter-spacing:-.01em; }
-.brand svg{ width:36px; height:36px; flex:none; }
-.link{ background:none; border:0; padding:0; margin-left:8px; color:var(--accent); font-weight:700; cursor:pointer; text-decoration:underline; }
+/* a phone-width column, centred on wider screens */
+.col{ --pad:24px; width:100%; max-width:480px; margin:0 auto; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
+  padding:max(20px, env(safe-area-inset-top)) var(--pad) max(30px, env(safe-area-inset-bottom)); }
+@media (max-width:359px){ .col{ --pad:16px; } }
+/* drawings that run to the screen edges, past the column's side padding */
+.bleed{ display:block; width:calc(100% + 2 * var(--pad)); margin-left:calc(-1 * var(--pad)); margin-right:calc(-1 * var(--pad)); overflow:visible; }
 
-.panel{ background:var(--surface); border:2px solid var(--line); border-radius:18px; box-shadow:0 4px 0 var(--line); padding:18px; }
-.panel + .panel{ margin-top:18px; }
-.hero{ display:flex; align-items:center; justify-content:space-between; gap:16px 24px; flex-wrap:wrap; background:var(--tint); }
-.hero p{ margin:0; max-width:52ch; }
-.grid{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; align-items:start; margin-top:18px; }
-@media (max-width:760px){ .grid{ grid-template-columns:minmax(0,1fr); } }
+/* ── buttons ── */
+.btn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:var(--button-height); padding:0 18px;
+  border-radius:var(--radius-button); border:0; font-family:var(--font-display); font-weight:600; font-size:var(--fs-button); line-height:1.15;
+  text-align:center; text-decoration:none; cursor:pointer; touch-action:manipulation; transition:transform var(--dur-press) ease, box-shadow var(--dur-press) ease; }
+.btn svg{ flex:none; }
+.btn.primary{ background:var(--honey); color:var(--ink); box-shadow:var(--shadow-button); }
+.btn.primary:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--honey-edge); }
+.btn.secondary{ background:transparent; border:2px solid var(--line-strong); color:var(--text); font-weight:500; }
+.btn.secondary:active{ transform:translateY(3px); }
+.btn.waiting,.btn:disabled{ background:transparent; border:2px dashed var(--line-strong); color:var(--text-muted); font-weight:500; font-size:18px;
+  box-shadow:none; transform:none; cursor:default; }
+.btn.slim{ min-height:52px; font-size:18px; }
+.btn.small{ width:auto; min-height:46px; padding:0 18px; border-radius:14px; font-size:17px; flex:none; }
+.btn.small.primary{ box-shadow:0 3px 0 var(--honey-edge); }
+.btn-row{ display:flex; flex-direction:column; gap:12px; }
+.pair-btns{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+.ghost{ min-height:48px; border-radius:14px; border:2px solid var(--line-strong); background:transparent; color:var(--text);
+  display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:15px; cursor:pointer; padding:0 10px; }
+.ghost:active{ transform:translateY(2px); }
+.icon-btn{ width:48px; height:48px; flex:none; border-radius:50%; border:0; background:var(--panel); color:var(--text);
+  display:grid; place-items:center; cursor:pointer; padding:0; }
+.icon-btn:active{ transform:translateY(2px); }
+.link{ background:none; border:0; padding:0 4px; min-height:44px; color:var(--honey); font-weight:800; cursor:pointer;
+  text-decoration:underline; text-underline-offset:3px; }
 
-.btn{ font-weight:700; padding:9px 16px; border-radius:12px; border:2px solid var(--line); background:var(--surface);
-  color:var(--ink); box-shadow:0 3px 0 var(--line); cursor:pointer; white-space:nowrap; touch-action:manipulation; }
-.btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
-.btn:disabled{ opacity:.55; cursor:default; }
-.btn.primary{ background:var(--accent); color:var(--accent-ink); }
-.btn.big{ font-size:1.1rem; padding:13px 24px; }
-:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
-.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.row.end{ justify-content:flex-end; }
-.field{ width:100%; padding:11px 12px; border-radius:12px; border:2px solid var(--line); background:var(--surface); margin:6px 0 12px; }
+/* ── bars, chips, tokens ── */
+.bar{ display:flex; align-items:center; gap:12px; min-height:48px; }
+.bar h1{ flex:1; font-family:var(--font-display); font-weight:600; font-size:var(--fs-h1); }
+@media (max-width:359px){ .bar .me-chip{ max-width:44%; } }
+.me-chip{ display:flex; align-items:center; gap:10px; height:48px; max-width:min(62%, 220px); padding:0 16px 0 4px; border-radius:24px; border:0;
+  background:var(--panel); color:var(--text); font-weight:700; font-size:15px; cursor:pointer; flex:none; min-width:0; }
+.me-chip:active{ transform:translateY(2px); }
+.token{ --ring:var(--honey); --t:40px; width:var(--t); height:var(--t); flex:none; border-radius:50%; background:var(--card);
+  box-shadow:0 0 0 3px var(--ring); display:grid; place-items:center; }
+.token img{ width:70%; height:70%; }
+.token.them{ --ring:var(--coral); }
+.token.big{ --t:46px; }
+.tokens-stack{ display:flex; flex:none; padding-left:3px; }
+.tokens-stack .token + .token{ margin-left:-12px; }
+.chip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 12px; border-radius:var(--radius-chip);
+  font-weight:800; font-size:13px; white-space:nowrap; }
+.chip.ok{ background:var(--ok-tint); color:var(--ok); }
+.chip.you{ background:var(--honey-tint); color:var(--honey-on-tint); }
+.chip.them{ background:var(--coral-tint); color:var(--coral-on-tint); }
+.chip.panel{ background:var(--panel); color:var(--text); }
+.winner{ display:inline-block; height:22px; padding:0 8px; border-radius:11px; font-family:var(--font-body); font-weight:800; font-size:11px;
+  line-height:22px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink); background:var(--honey); flex:none; }
+.winner.them{ background:var(--coral); }
+.pill{ display:inline-flex; align-items:baseline; gap:5px; height:38px; padding:0 14px; border-radius:19px; line-height:38px;
+  white-space:nowrap; flex:none; position:relative; font-variant-numeric:tabular-nums; }
+.pill b{ font-family:var(--font-display); font-weight:600; font-size:22px; }
+.pill small{ font-weight:800; font-size:12px; }
+.pill.you{ background:var(--honey-tint); color:var(--honey); } .pill.you small{ color:var(--honey-on-tint); }
+.pill.them{ background:var(--coral-tint); color:var(--coral); } .pill.them small{ color:var(--coral-on-tint); }
 
-.note{ border:2px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:18px; background:var(--surface); }
-.note.warn{ border-color:var(--warn); }
-.note summary{ cursor:pointer; font-weight:700; color:var(--accent); margin-top:6px; }
+/* ── panels and rows ── */
+.panel{ background:var(--panel); border-radius:var(--radius-panel-lg); padding:20px; }
+.section{ display:flex; flex-direction:column; gap:10px; margin-top:24px; }
+.rows{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.prow{ min-height:68px; padding:10px 14px; border-radius:var(--radius-panel); background:var(--panel); display:flex; align-items:center;
+  gap:12px; flex-wrap:wrap; }
+.prow.dashed{ background:transparent; border:2px dashed var(--line-strong); }
+.prow .grow{ display:flex; flex-direction:column; flex:1; min-width:0; }
+.prow .title{ font-family:var(--font-display); font-weight:600; font-size:18px; display:flex; align-items:center; gap:8px; min-width:0; }
+.prow .sub{ font-size:var(--fs-small); color:var(--text-muted); }
+.prow .wide{ flex-basis:100%; }
+.prow .num{ font-family:var(--font-display); font-weight:600; font-size:22px; color:var(--honey); text-align:right; flex:none;
+  font-variant-numeric:tabular-nums; }
+.prow .num.them{ color:var(--coral); }
+.prow .num small{ display:block; font-family:var(--font-body); font-weight:800; font-size:11px; letter-spacing:.5px; text-transform:uppercase;
+  color:var(--honey-on-tint); line-height:1; }
+.prow .num.them small{ color:var(--coral-on-tint); }
+.empty{ color:var(--text-muted); font-size:15px; padding:2px 2px 0; }
+.duel-disc{ width:46px; height:46px; flex:none; border-radius:50%; background:var(--card); color:var(--ink); box-shadow:0 3px 0 var(--card-edge);
+  display:grid; place-items:center; font-family:var(--font-display); font-weight:600; font-size:19px; transform:rotate(-4deg); }
+.times{ display:flex; flex-wrap:wrap; gap:6px; }
+.wait-disc{ width:46px; height:46px; flex:none; border-radius:50%; border:2px dashed var(--line-strong); display:flex; align-items:center;
+  justify-content:center; gap:4px; }
+.wait-disc i{ width:6px; height:6px; border-radius:3px; background:var(--text-muted); animation:waitdot 1.4s infinite ease-in-out; }
+.wait-disc i:nth-child(2){ animation-delay:.2s; } .wait-disc i:nth-child(3){ animation-delay:.4s; }
+details.pairs summary{ cursor:pointer; color:var(--honey); font-weight:800; font-size:14px; min-height:36px; display:flex; align-items:center; }
+.scroll-x{ overflow-x:auto; }
+
+/* ── forms ── */
+.field{ width:100%; height:var(--input-height); padding:0 18px; border-radius:var(--radius-input); border:2px solid var(--line);
+  background:var(--panel); color:var(--text); font-weight:700; font-size:18px; }
+.field::placeholder{ color:var(--placeholder); opacity:1; }
+.field.link-field{ height:48px; font-weight:600; font-size:14px; color:var(--text-soft); background:var(--felt); }
+.tokens{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+.tokens button{ height:102px; border-radius:18px; border:0; background:var(--panel); color:var(--text); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:14px; cursor:pointer; }
+.tokens button[aria-pressed="true"]{ background:var(--panel-raised); box-shadow:0 0 0 3px var(--honey); }
+.tokens .disc{ width:56px; height:56px; border-radius:50%; background:var(--card); display:grid; place-items:center; }
+.tokens .disc img{ width:40px; height:40px; }
+@media (max-width:359px){ .tokens button{ height:92px; } .tokens .disc{ width:48px; height:48px; } }
+.known{ display:flex; flex-wrap:wrap; gap:8px; }
+.known button{ display:flex; align-items:center; gap:8px; min-height:44px; max-width:100%; padding:0 14px 0 4px; border-radius:22px; border:0;
+  background:var(--panel); color:var(--text); font-weight:700; font-size:15px; cursor:pointer; }
+.known .token{ --t:32px; box-shadow:none; }
+
+/* ── notes ── */
+.note{ border:2px solid var(--line); border-radius:var(--radius-panel); padding:14px 16px; margin-top:16px; font-size:15px; color:var(--text-soft); }
+.note b{ color:var(--text); }
+.note.warn{ border-color:var(--coral); }
+.note summary{ cursor:pointer; font-weight:800; color:var(--honey); margin-top:6px; min-height:44px; display:flex; align-items:center; }
 .note ol{ margin:10px 0 0; padding-left:22px; } .note li{ margin-bottom:8px; }
-code,pre{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.82rem; }
-code{ background:var(--soft); padding:1px 5px; border-radius:5px; }
-pre{ background:var(--soft); padding:12px; border-radius:10px; overflow:auto; max-height:260px; margin:8px 0; }
+code,pre{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.82rem; }
+code{ background:var(--panel); padding:1px 5px; border-radius:5px; color:var(--text); overflow-wrap:anywhere; }
+pre{ background:var(--felt); border:2px solid var(--line); padding:12px; border-radius:12px; overflow:auto; max-height:240px; margin:8px 0; color:var(--text-soft); }
 
-.list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
-.duel{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; align-items:center; padding:12px 14px;
-  border:2px solid var(--soft); border-radius:14px; }
-.duel.mine{ border-color:var(--accent); background:var(--tint); }
-.duel .t{ font-weight:800; }
-.duel .wide{ grid-column:1 / -1; }
-.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-.chip{ display:inline-flex; gap:6px; align-items:baseline; padding:3px 10px; border-radius:999px; background:var(--soft);
-  font-size:.9rem; font-variant-numeric:tabular-nums; }
-.chip.win{ background:var(--gold); color:#1c2230; font-weight:700; }
-.time{ font-weight:800; font-variant-numeric:tabular-nums; }
-details.rounds summary{ cursor:pointer; color:var(--accent); font-weight:700; font-size:.875rem; margin-top:6px; }
-table{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
-th,td{ text-align:right; padding:6px 4px; border-bottom:1px solid var(--soft); }
-th{ font-size:.8rem; color:var(--muted); font-weight:700; }
+/* ── tables ── */
+table{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:15px; }
+th,td{ text-align:right; padding:7px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+th{ font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); max-width:96px; overflow:hidden; text-overflow:ellipsis; }
 th:first-child,td:first-child{ text-align:left; }
 tr:last-child td{ border-bottom:0; }
-td.best{ font-weight:800; color:var(--ok); }
-.you{ font-size:.75rem; font-weight:700; color:var(--accent); margin-left:6px; }
-.invite{ display:flex; gap:8px; } .invite .field{ margin:0; min-width:0; flex:1; }
-ul.plain{ margin:0; padding-left:20px; } ul.plain li{ margin-bottom:6px; }
+td.best{ font-weight:800; color:var(--honey); } td.best.them{ color:var(--coral); }
+td.total{ font-family:var(--font-display); font-weight:600; font-size:17px; }
 
-.result{ text-align:center; }
-.result .bigtime{ font-size:clamp(2.6rem,10vw,4rem); font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; margin:6px 0; }
-.result .row{ justify-content:center; margin-top:16px; }
+/* ── welcome ── */
+.hero-art{ max-height:42vh; margin-top:10px; }
+.h-card{ fill:var(--card); } .h-edge{ fill:var(--card-edge); } .h-stitch{ fill:none; stroke:var(--card-stitch); stroke-width:2; stroke-dasharray:6 5; }
+.h-ring{ fill:color-mix(in srgb, var(--honey) 24%, transparent); stroke:var(--honey); stroke-width:3; }
+.h-sticker{ fill:var(--honey); } .h-sticker-edge{ fill:var(--honey-edge); }
+.h-text{ fill:var(--ink); font-family:var(--font-display); font-weight:600; font-size:16px; }
+.h-tok{ fill:var(--card); stroke-width:4; } .h-tok.you{ stroke:var(--honey); } .h-tok.them{ stroke:var(--coral); }
+.wordmark{ font-family:var(--font-display); font-weight:600; font-size:var(--fs-hero); line-height:1; letter-spacing:-.5px; }
+.tagline{ font-size:var(--fs-body); line-height:1.5; color:var(--text-soft); }
 
-/* ── play screen ── */
-.play{ height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden; position:relative;
-  user-select:none; -webkit-user-select:none; touch-action:manipulation; }
-.hud{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; padding:14px 16px 8px; }
-.dots{ display:flex; gap:5px; }
-.dots i{ width:11px; height:11px; flex:none; border-radius:50%; border:2px solid var(--ink); }
-@media (max-width:520px){
-  .hud{ gap:8px; padding-left:12px; padding-right:12px; }
-  .dots{ gap:3px; } .dots i{ width:8px; height:8px; border-width:1.5px; }
-  .clock{ font-size:1.7rem; } .miss{ font-size:.8rem; }
-}
-.dots i.on{ background:var(--accent); border-color:var(--accent); }
-.clockwrap{ position:relative; text-align:center; }
-.clock{ font-size:2rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
-.pen{ position:absolute; left:100%; top:0; margin-left:8px; color:var(--warn); font-weight:800; white-space:nowrap; opacity:0; }
+/* ── sheets and overlays ── */
+.backdrop{ position:fixed; inset:0; z-index:40; background:rgba(8,20,15,.62); display:flex; align-items:flex-end; justify-content:center; }
+.sheet{ width:100%; max-width:480px; max-height:92vh; max-height:92dvh; overflow:auto; background:var(--felt); border-top:2px solid var(--line);
+  border-radius:var(--radius-panel-lg) var(--radius-panel-lg) 0 0; padding:24px 24px max(26px, env(safe-area-inset-bottom));
+  box-shadow:0 -12px 32px rgba(8,20,15,.45); animation:sheetup var(--dur-toast) var(--ease-out); }
+.sheet h2{ font-family:var(--font-display); font-weight:600; font-size:var(--fs-h1); margin-bottom:8px; }
+.sheet .btn-row{ margin-top:22px; }
+.steps{ list-style:none; margin:16px 0 0; padding:0; display:flex; flex-direction:column; gap:14px; }
+.steps li{ display:flex; gap:14px; align-items:flex-start; color:var(--text-soft); }
+.steps .n{ width:32px; height:32px; flex:none; border-radius:50%; background:var(--honey); color:var(--ink); display:grid; place-items:center;
+  font-family:var(--font-display); font-weight:600; }
+.mini{ display:block; width:100%; max-width:300px; margin:14px auto 0; }
+
+/* ── duel screen ── */
+.play{ --d:min(260px, calc(100vw - 40px), calc((100dvh - 334px) / 2)); position:relative; width:100%; max-width:480px; height:100vh; height:100dvh;
+  margin:0 auto; padding:max(16px, env(safe-area-inset-top)) 20px max(22px, env(safe-area-inset-bottom)); display:flex; flex-direction:column;
+  overflow:hidden; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation; }
+.play-bar{ justify-content:space-between; flex:none; }
+.play-mid{ flex:1; display:flex; justify-content:center; min-width:0; }
+.play-title{ font-family:var(--font-display); font-weight:500; font-size:16px; color:var(--text-soft); }
+.left-chip{ display:flex; align-items:center; gap:8px; height:40px; padding:0 14px; border-radius:20px; background:var(--panel);
+  font-weight:800; font-size:15px; white-space:nowrap; flex:none; }
+.friends{ margin-top:12px; flex:none; min-height:56px; padding:0 12px 0 8px; flex-wrap:nowrap; }
+.friends .title{ font-size:17px; }
+.play .me{ margin-top:auto; flex:none; min-height:56px; padding:0 12px 0 8px; flex-wrap:nowrap; }
+.play .me .title{ font-size:17px; }
+.stage{ display:flex; flex-direction:column; align-items:center; flex:none; }
+.stage .caption{ margin-top:12px; }
+.slot{ margin-top:8px; flex:none; }
+.toastline{ height:44px; margin-top:12px; display:flex; align-items:center; justify-content:center; flex:none; max-width:100%; }
+.toast{ display:flex; align-items:center; height:38px; padding:0 16px; border-radius:19px; border:2px solid transparent; font-weight:800;
+  font-size:15px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+.toast.hint{ background:var(--panel); border-color:var(--panel); color:var(--text-soft); }
+.toast.good{ background:var(--honey); border-color:var(--honey); color:var(--ink); }
+.toast.bad{ background:var(--miss-toast); border-color:var(--miss-toast); color:var(--ink); }
+.pen{ position:absolute; right:4px; bottom:100%; margin-bottom:2px; color:var(--miss-toast); font-weight:800; font-size:15px; opacity:0; pointer-events:none; }
 .pen.go{ animation:floatup .9s ease-out; }
-.miss{ text-align:right; font-size:.9rem; color:var(--muted); }
-.miss b{ color:var(--ink); font-size:1.05rem; margin-left:4px; }
-.stage{ flex:1; min-height:0; display:flex; align-items:center; justify-content:center; gap:clamp(14px,4vw,48px);
-  padding:8px 16px 22px; --d:min(44vw, calc(100dvh - 130px), 520px); }
-@media (orientation:portrait){
-  .stage{ flex-direction:column; gap:18px; --d:min(88vw, calc((100dvh - 150px) / 2), 520px); }
+.card{ position:relative; width:var(--d); height:var(--d); flex:none; border-radius:50%; background:var(--card); box-shadow:var(--shadow-card); }
+.card::before{ content:''; position:absolute; inset:calc(var(--d) * .035); border:2px dashed var(--card-stitch); border-radius:50%; pointer-events:none; }
+.card.blank{ opacity:.6; }
+.card.slide{ z-index:3; }
+.sym{ position:absolute; padding:0; border:0; border-radius:50%; background:transparent; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation; transition:transform 180ms cubic-bezier(.2,.8,.2,1.3), box-shadow 160ms ease, background 160ms ease; }
+.sym img{ width:100%; height:100%; transform:rotate(var(--tilt)); pointer-events:none; }
+.sym.hit{ z-index:1; background:color-mix(in srgb, var(--honey) 28%, transparent); box-shadow:0 0 0 4px var(--honey); transform:scale(1.14); }
+.sym.miss{ background:color-mix(in srgb, var(--miss) 16%, transparent); box-shadow:0 0 0 3px var(--miss); transform:scale(.92); }
+.overlay{ position:absolute; inset:0; z-index:20; display:flex; align-items:flex-end; justify-content:center;
+  background:color-mix(in srgb, var(--felt) 80%, transparent); }
+.overlay.center{ align-items:center; }
+.overlay .sheet{ position:relative; }
+.count{ font-family:var(--font-display); font-weight:600; font-size:96px; line-height:1; color:var(--text); animation:pop var(--dur-toast) var(--ease-bounce); }
+/* short screens: no friends row or caption, and the clock moves up into the top bar */
+@media (max-height:799px){
+  .play{ --d:min(260px, calc(100vw - 40px), calc((100dvh - 176px) / 2)); }
+  .play .friends,.stage .caption,.play .me{ display:none; }
+  .toastline{ margin-top:8px; }
 }
-.card{ width:var(--d); height:var(--d); flex:none; position:relative; border-radius:50%; background:var(--card);
-  border:4px solid var(--line); box-shadow:0 6px 0 var(--line); }
-.card.pop{ animation:pop .18s ease-out; }
-.card.blank{ opacity:.45; }
-.sym{ position:absolute; width:calc(var(--d) * var(--s) / 2); height:calc(var(--d) * var(--s) / 2);
-  transform:translate(-50%,-50%) rotate(var(--r)); font-size:calc(var(--d) * var(--s) * 0.4); line-height:1;
-  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
-  display:grid; place-items:center; padding:0; border:0; border-radius:50%; background:none; color:#1c2230; cursor:pointer;
-  -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
-.sym img{ display:block; width:100%; height:100%; pointer-events:none; }
-.sym.hit{ box-shadow:0 0 0 4px var(--ok); background:rgba(31,157,107,.2); }
-.sym.hit span{ animation:pulse .35s ease; }
-.sym.miss{ animation:missring .45s ease-out; }
-.sym.miss span{ animation:shake .3s ease; }
-.overlay{ position:absolute; inset:0; display:grid; place-items:center; padding:16px; background:rgba(20,24,33,.35); }
+/* phones held sideways: the two cards side by side */
+@media (orientation:landscape) and (max-height:520px){
+  .play{ --d:min(260px, calc(100dvh - 150px), calc((100vw - 120px) / 2)); max-width:none; }
+  .stage{ flex:1; display:grid; grid-template-columns:auto auto; grid-template-areas:"pile you" "toast toast"; column-gap:32px;
+    justify-content:center; align-content:center; }
+  .stage .pile-slot{ grid-area:pile; } .stage .you-slot{ grid-area:you; } .stage .toastline{ grid-area:toast; }
+}
+
+/* ── results ── */
+.result .fan{ max-height:26vh; margin-top:12px; }
+.result h1{ font-family:var(--font-display); font-weight:600; font-size:var(--fs-h1-result); line-height:1.05; }
+.result .head{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-top:16px; text-align:center; }
+.bars{ list-style:none; margin:20px 0 0; padding:16px; border-radius:22px; background:var(--panel); display:flex; flex-direction:column; gap:14px; }
+.bars li{ display:flex; align-items:center; gap:12px; }
+.bars .grow{ display:flex; flex-direction:column; gap:6px; flex:1; min-width:0; }
+.bars .who{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:17px; min-width:0; }
+.bars .track{ height:10px; border-radius:5px; background:var(--felt); overflow:hidden; }
+.bars .fill{ display:block; height:10px; border-radius:5px; background:var(--honey); }
+.bars .them .fill{ background:var(--coral); }
+.bars .t{ min-width:44px; text-align:right; font-family:var(--font-display); font-weight:600; font-size:24px; color:var(--honey); white-space:nowrap;
+  font-variant-numeric:tabular-nums; }
+.bars .them .t{ color:var(--coral); }
+.bars .t.out{ font-size:15px; color:var(--text-muted); }
+.bars li.waiting .who{ color:var(--text-soft); font-weight:500; }
+.tiles{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; margin-top:12px; }
+.tile{ padding:14px 16px; border-radius:18px; border:2px solid var(--line); display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tile b{ font-family:var(--font-display); font-weight:600; font-size:26px; color:var(--text); }
+.tile .caption{ text-align:left; letter-spacing:1px; }
+.result .btn-row{ margin-top:24px; }
+.save-note{ margin-top:12px; text-align:center; font-size:15px; color:var(--text-soft); }
+.save-note.bad{ color:var(--coral); }
+
+/* ── the table ── */
+.status-title{ font-family:var(--font-display); font-weight:600; font-size:28px; line-height:1.15; }
+.dock{ position:sticky; bottom:0; margin:auto calc(-1 * var(--pad)) 0; padding:14px var(--pad) max(18px, env(safe-area-inset-bottom)); background-color:var(--felt);
+  background-image:radial-gradient(var(--felt-dot) 1px, transparent 1.4px); background-size:7px 7px; z-index:5; }
+.table-col{ padding-bottom:0; }
+
 .overlay[hidden]{ display:none; }
-.intro{ max-width:440px; width:100%; }
-.count{ font-size:min(40vw,220px); font-weight:800; color:#fff; text-shadow:0 6px 0 rgba(0,0,0,.35); animation:pop .25s ease-out; }
-@keyframes pop{ from{ transform:scale(.86); opacity:0; } to{ transform:none; opacity:1; } }
-@keyframes pulse{ 50%{ transform:scale(1.25); } }
-@keyframes shake{ 25%{ transform:translateX(-12%); } 75%{ transform:translateX(12%); } }
-@keyframes missring{ from{ box-shadow:0 0 0 4px var(--warn); background:rgba(200,64,31,.2); } to{ box-shadow:0 0 0 4px transparent; background:transparent; } }
+.prow .num.out{ font-family:var(--font-body); font-weight:800; font-size:14px; color:var(--text-muted); }
+.chip.tiny{ min-height:22px; padding:0 8px; font-size:11px; letter-spacing:.5px; }
+.result h1{ overflow-wrap:anywhere; }
+
+/* ── motion ── */
+@keyframes deal{ from{ transform:translateY(-36px) rotate(-14deg) scale(.88); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes slide{ from{ transform:translate(var(--fx, 0px), var(--fy, -324px)); } to{ transform:none; } }
+@keyframes shake{ 0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-10px); } 40%{ transform:translateX(9px); } 60%{ transform:translateX(-6px); } 80%{ transform:translateX(4px); } }
+@keyframes pop{ from{ transform:scale(.85); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes waitdot{ 0%,80%,100%{ opacity:.25; } 40%{ opacity:1; } }
 @keyframes floatup{ from{ opacity:1; transform:translateY(6px); } to{ opacity:0; transform:translateY(-22px); } }
-@media (prefers-reduced-motion:reduce){ *{ animation-duration:.01ms !important; } }
+@keyframes sheetup{ from{ transform:translateY(40px); opacity:0; } to{ transform:none; opacity:1; } }
+.deal{ animation:deal var(--dur-deal) var(--ease-bounce); }
+.slide{ animation:slide var(--dur-slide) var(--ease-out); }
+.shake{ animation:shake var(--dur-shake) ease; }
+.pop{ animation:pop var(--dur-toast) cubic-bezier(.2,.8,.2,1.3); }
+@media (prefers-reduced-motion:reduce){
+  .deal,.slide,.shake,.pop,.sheet,.count,.pen.go{ animation:none !important; }
+  .wait-disc i{ animation:none; opacity:.6; }
+  .sym,.btn{ transition:none; }
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
-<noscript>This game needs JavaScript.</noscript>
+<noscript>Tobble needs JavaScript.</noscript>
 <script>
 (() => {
 'use strict';
@@ -455,7 +637,7 @@ const store = {
   get(k){ try { const v = localStorage.getItem(k); if (v != null) return v; } catch {} return mem.has(k) ? mem.get(k) : null; },
   set(k, v){ mem.set(k, v); try { localStorage.setItem(k, v); } catch {} },
 };
-const K = { name:'tobble:name', room:'tobble:room', demo:'tobble:demo',
+const K = { name:'tobble:name', token:'tobble:token', sound:'tobble:sound', room:'tobble:room', demo:'tobble:demo',
             local:(room, key) => `tobble:local:${room}:${key}` };
 
 /* ─────────────────────────── 4. STORAGE BACKENDS ───────────────────────────
@@ -578,6 +760,8 @@ const state = {
   created: [],                      // duels started on this page, kept until the scoreboard lists them
   local: { prog: {}, final: {} },   // this player's unfinished duel and unsaved results, kept in the browser
   shown: null,                      // the result screen being shown
+  stopPlay: null,                   // stops the duel on screen (clock, timers)
+  pickToken: null,                  // selects a token on the name screen
   open: new Set(),                  // expanded "Pair by pair" panels
   saving: new Map(), sent: new Set(), refused: new Set(),
 };
@@ -640,13 +824,15 @@ function leaderboard(rows){
   const avg = p => p.n ? p.sum / p.n : Infinity;
   return [...players.values()].sort((a, b) => b.wins - a.wins || a.losses - b.losses || avg(a) - avg(b));
 }
-function otherPlayers(){
+// Everyone else seen in this game: [{ key, name }].
+function otherPlayerList(){
   const me = state.player ? state.player.key : '', names = new Map();
   for (const d of state.duels) if (d.createdBy) names.set(slug(d.createdBy), d.createdBy);
   for (const r of state.results) names.set(r.key, r.name);
   names.delete(me);
-  return [...names.values()];
+  return [...names].map(([key, name]) => ({ key, name }));
 }
+const otherPlayers = () => otherPlayerList().map(p => p.name);
 
 /* ─────────────────────────── 6. START-UP ─────────────────────────── */
 function boot(){
@@ -660,11 +846,12 @@ function boot(){
     state.backend = supabaseBackend(url, key);
   } else state.backend = localBackend();
   const name = store.get(K.name);
-  if (name) state.player = { name, key: slug(name) };
+  if (name) state.player = { name, key: slug(name), token: validToken(store.get(K.token)) };
   window.addEventListener('hashchange', enterRoom);
   enterRoom();
 }
 function enterRoom(){
+  if (state.stopPlay) state.stopPlay();
   if (state.feed){ state.feed.stop(); state.feed = null; }
   Object.assign(state, { duels: [], results: [], sig: '', created: [], loaded: false, slow: false, error: null, shown: null });
   if (isDemo()) state.room = 'demo';
@@ -698,11 +885,12 @@ function enterRoom(){
   });
   render();
 }
-function setPlayer(name){
-  state.player = { name, key: slug(name) };
+function setPlayer(name, token){
+  state.player = { name, key: slug(name), token: validToken(token) };
   store.set(K.name, name);
+  if (state.player.token) store.set(K.token, state.player.token);
   syncLocal();
-  state.screen = 'lobby';
+  state.screen = state.room ? 'lobby' : 'landing';
   housekeeping(); render();
 }
 // Finish what an earlier visit left behind: re-send unsaved results, close duels that ran out of time.
@@ -725,7 +913,7 @@ function housekeeping(){
     const startedAt = (prog && prog.startedAt) || (stored && stored.startedAt) || 0;
     if (startedAt && Date.now() - startedAt > TIME_LIMIT_MS){
       state.local.final[duel.id] = { id, duelId: duel.id, key: me.key, name: me.name, startedAt,
-        finishedAt: startedAt + TIME_LIMIT_MS, mistakes: prog ? prog.mistakes : 0, splits: prog ? prog.splits : [], dnf: true };
+        finishedAt: startedAt + TIME_LIMIT_MS, mistakes: prog ? prog.mistakes : 0, splits: prog ? prog.splits : [], dnf: true, token: myToken() };
       delete state.local.prog[duel.id]; dirty = true;
       resend(duel.id).catch(() => {});
     }
@@ -748,6 +936,144 @@ function resend(duelId){
 const isUnsaved = duelId => !!state.local.final[duelId] && !state.sent.has(duelId);
 
 /* ─────────────────────────── 7. SCREENS ─────────────────────────── */
+const symbolSrc = id => `assets/symbols/${id}.svg`;
+const ICONS = {
+  plus:'<path d="M12 5v14M5 12h14"/>', back:'<path d="M15 5l-7 7 7 7"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>', check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  enter:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  share:'<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+  soundOn:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  soundOff:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9l5 6M21 9l-5 6"/>',
+  pile:'<circle cx="13" cy="13" r="8"/><path d="M5.6 15.5A8 8 0 0 1 15.5 5.6"/>',
+};
+function icon(name, size = 22, stroke = 2.2){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const attrs = { width:size, height:size, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', 'stroke-width':stroke,
+                  'stroke-linecap':'round', 'stroke-linejoin':'round', 'aria-hidden':'true', focusable:'false' };
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  el.innerHTML = ICONS[name];
+  return el;
+}
+// Decorative drawings built from fixed markup in this file; never from stored data.
+function art(markup){
+  const t = document.createElement('template');
+  t.innerHTML = markup.trim();
+  return t.content.firstChild;
+}
+
+// Tokens: the picture a player shows next to their name. Players from before tokens existed get a steady default.
+function hashOf(text){
+  let x = 2166136261;
+  for (const c of String(text)){ x ^= c.codePointAt(0); x = Math.imul(x, 16777619); }
+  return x >>> 0;
+}
+const validToken = t => TOKENS.includes(t) ? t : null;
+const defaultToken = key => TOKENS[hashOf(key) % TOKENS.length];
+function tokenOf(key){
+  if (state.player && key === state.player.key) return state.player.token || defaultToken(key);
+  let best = null;
+  for (const r of allResults()){
+    if (r.key === key && r.token && (!best || (r.finishedAt || r.startedAt) >= (best.finishedAt || best.startedAt))) best = r;
+  }
+  return best ? best.token : defaultToken(key);
+}
+const myToken = () => state.player ? tokenOf(state.player.key) : 'mug';
+function tokenEl(token, them, extra){
+  return h('span', { class:'token' + (them ? ' them' : '') + (extra ? ' ' + extra : '') }, h('img', { src: symbolSrc(token), alt:'' }));
+}
+
+// Sounds are tiny tones made on the spot (no audio files); vibration where the phone supports it.
+const sound = { on: store.get(K.sound) !== 'off', ctx: null };
+function blip(kind){
+  if (!sound.on) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const c = sound.ctx || (sound.ctx = new AC());
+    if (c.state === 'suspended') c.resume();
+    const t = c.currentTime + 0.01;
+    const tone = (freq, at, dur, type, vol) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t + at);
+      g.gain.setValueAtTime(0.0001, t + at);
+      g.gain.exponentialRampToValueAtTime(vol, t + at + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + at + dur);
+      o.connect(g); g.connect(c.destination); o.start(t + at); o.stop(t + at + dur + 0.05);
+    };
+    if (kind === 'match'){ tone(784, 0, 0.16, 'sine', 0.16); tone(1175, 0.07, 0.24, 'sine', 0.12); }
+    else if (kind === 'miss'){ tone(150, 0, 0.18, 'triangle', 0.22); tone(110, 0.05, 0.16, 'triangle', 0.16); }
+    else if (kind === 'tick'){ tone(440, 0, 0.08, 'sine', 0.07); }
+    else if (kind === 'done'){ [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.09, 0.3, 'sine', 0.11)); }
+    else if (kind === 'deal'){   // a soft card flick: a burst of filtered noise
+      const n = Math.floor(c.sampleRate * 0.07), buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
+      const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      f.type = 'bandpass'; f.frequency.value = 2400; g.gain.value = 0.18;
+      src.buffer = buf; src.connect(f); f.connect(g); g.connect(c.destination); src.start(t);
+    }
+  } catch {}
+}
+function buzz(pattern){ try { if (navigator.vibrate) navigator.vibrate(pattern); } catch {} }
+function soundButton(){
+  const btn = h('button', { class:'icon-btn', type:'button' });
+  const paint = () => { btn.setAttribute('aria-label', sound.on ? 'Sound is on' : 'Sound is off'); btn.replaceChildren(icon(sound.on ? 'soundOn' : 'soundOff')); };
+  btn.addEventListener('click', () => { sound.on = !sound.on; store.set(K.sound, sound.on ? 'on' : 'off'); paint(); blip('match'); });
+  paint();
+  return btn;
+}
+function soundLink(){
+  const btn = h('button', { class:'link', type:'button' });
+  const paint = () => { btn.textContent = sound.on ? 'Sound on' : 'Sound off'; };
+  btn.addEventListener('click', () => { sound.on = !sound.on; store.set(K.sound, sound.on ? 'on' : 'off'); paint(); blip('match'); });
+  paint();
+  return btn;
+}
+
+// A bottom sheet for questions and short guides. Escape or a tap outside closes it.
+let closeOpenSheet = null;
+function sheet(title, body, actions){
+  if (closeOpenSheet) closeOpenSheet();
+  const before = document.activeElement, id = 'sheet-' + randomId(6);
+  const back = h('div', { class:'backdrop' });
+  const close = () => {
+    if (!back.isConnected) return;
+    back.remove(); document.removeEventListener('keydown', onKey); closeOpenSheet = null;
+    if (before && before.isConnected && before.focus) before.focus();
+  };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  back.append(h('div', { class:'sheet', role:'dialog', 'aria-modal':'true', 'aria-labelledby': id },
+    h('h2', { id, text: title }), body,
+    h('div', { class:'btn-row' }, actions.map(a => h('button', { class:'btn ' + (a.cls || 'secondary'), type:'button',
+      onclick: () => { close(); if (a.onclick) a.onclick(); } }, a.label)))));
+  back.addEventListener('click', e => { if (e.target === back) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.append(back);
+  closeOpenSheet = close;
+  const first = back.querySelector('.btn');
+  if (first) first.focus();
+  return close;
+}
+
+function miniPair(){
+  const card = (cx, rot, items) => `<g transform="rotate(${rot} ${cx} 64)"><circle class="h-edge" cx="${cx}" cy="68" r="56"/>` +
+    `<circle class="h-card" cx="${cx}" cy="64" r="56"/><circle class="h-stitch" cx="${cx}" cy="64" r="50"/>` +
+    items.map(([id, x, y, s, ring]) => (ring ? `<circle class="h-ring" cx="${cx + x}" cy="${64 + y}" r="${s / 2 + 3}"/>` : '') +
+      `<image href="${symbolSrc(id)}" x="${cx + x - s / 2}" y="${64 + y - s / 2}" width="${s}" height="${s}"/>`).join('') + '</g>';
+  return art(`<svg class="mini" viewBox="0 0 260 136" aria-hidden="true" focusable="false">
+    ${card(70, -6, [['moon', -16, -16, 34, true], ['leaf', 20, -6, 30], ['cookie', -2, 24, 32]])}
+    ${card(190, 7, [['star', -16, 18, 32], ['moon', 18, -14, 34, true], ['key', -16, -20, 28]])}</svg>`);
+}
+function howToPlay(){
+  sheet('How to play', [
+    miniPair(),
+    h('ol', { class:'steps' },
+      h('li', null, h('span', { class:'n', text:'1' }), h('span', { text:`Every duel is ${PAIRS} pairs of cards. The two cards of a pair always share exactly one picture.` })),
+      h('li', null, h('span', { class:'n', text:'2' }), h('span', { text:`Tap that picture on either card, as fast as you can. A wrong tap adds ${PENALTY_MS / 1000} seconds.` })),
+      h('li', null, h('span', { class:'n', text:'3' }), h('span', { text:'Your friends get the very same cards whenever they have time. The fastest total time wins, and the scoreboard keeps count.' }))),
+  ], [{ label:'Got it', cls:'primary' }]);
+}
+
 function render(){
   if (state.screen === 'play') return;          // the play screen draws itself
   $app.replaceChildren(view());
@@ -764,29 +1090,17 @@ function refresh(){
   render();
 }
 function view(){
-  if (state.fatal) return h('div', { class:'shell' }, h('div', { class:'panel narrow' },
-    h('h1', { text:'Symbol Duel' }), h('p', { text: state.fatal }),
-    h('button', { class:'btn primary', type:'button', onclick: () => location.reload() }, 'Try again')));
+  if (state.fatal) return h('div', { class:'col' },
+    h('div', { class:'bar' }, h('h1', { text:'Tobble' })),
+    h('div', { class:'note warn', role:'alert' }, h('b', { text:'Settings problem. ' }), state.fatal),
+    h('div', { style:'margin-top:auto;padding-top:24px' }, h('button', { class:'btn primary', type:'button', onclick: () => location.reload() }, 'Try again')));
   switch (state.screen){
     case 'landing': return landingView();
     case 'name': return nameView();
     case 'lobby': return lobbyView();
     case 'result': return resultView();
-    default: return h('div', { class:'shell' }, h('p', { class:'muted', text:'Loading…' }));
+    default: return h('div', { class:'col' }, h('p', { class:'muted', text:'Loading…' }));
   }
-}
-function logo(){
-  const box = h('span', { 'aria-hidden':'true' });
-  box.innerHTML = '<svg viewBox="0 0 40 40"><circle cx="15" cy="16" r="12" fill="#f0b429" stroke="#1c2230" stroke-width="2.5"/>' +
-    '<circle cx="25" cy="24" r="12" fill="#0e7c6b" fill-opacity=".9" stroke="#1c2230" stroke-width="2.5"/>' +
-    '<circle cx="20" cy="20" r="3.2" fill="#fffdf8" stroke="#1c2230" stroke-width="2"/></svg>';
-  return box.firstChild;
-}
-function topbar(){
-  return h('header', { class:'top' },
-    h('div', { class:'brand' }, logo(), h('span', { text:'Symbol Duel' })),
-    state.player && h('div', null, h('span', { class:'muted', text:'Playing as ' }), h('b', { text: state.player.name }),
-      h('button', { class:'link', type:'button', onclick: () => { state.screen = 'name'; render(); } }, 'change')));
 }
 function details(id, cls, label, ...body){
   const el = h('details', { class: cls, open: state.open.has(id) }, h('summary', { text: label }), body);
@@ -794,77 +1108,129 @@ function details(id, cls, label, ...body){
   return el;
 }
 function copyButton(label, getText, field){
-  const btn = h('button', { class:'btn', type:'button' }, label);
+  const btn = h('button', { class:'ghost', type:'button', style:'margin-top:4px' }, label);
   btn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(getText()); btn.textContent = 'Copied'; }
+    try { await navigator.clipboard.writeText(getText()); btn.textContent = 'Copied!'; }
     catch {   // clipboard not available: select the text so it can be copied by hand
       if (field && field.select){ field.focus(); field.select(); }
       else if (field){ const range = document.createRange(); range.selectNodeContents(field); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); }
       btn.textContent = 'Selected, now copy';
     }
-    setTimeout(() => { btn.textContent = label; }, 1800);
+    setTimeout(() => { btn.textContent = label; }, 1600);
   });
   return btn;
 }
+const meChip = () => h('button', { class:'me-chip', type:'button', 'aria-label':'Change name or token',
+  onclick: () => { state.screen = 'name'; render(); } }, tokenEl(myToken()), h('span', { class:'ell', text: state.player ? state.player.name : 'Guest' }));
 
+/* Welcome */
+function heroArt(){
+  const img = (id, x, y, s, rot) => `<image href="${symbolSrc(id)}" x="${x}" y="${y}" width="${s}" height="${s}" transform="rotate(${rot} ${x + s / 2} ${y + s / 2})"/>`;
+  const card = (cx, cy, rot, inner) => `<g transform="rotate(${rot} ${cx} ${cy})"><circle class="h-edge" cx="${cx}" cy="${cy + 6}" r="110" filter="url(#hero-shadow)"/>` +
+    `<circle class="h-card" cx="${cx}" cy="${cy}" r="110"/><circle class="h-stitch" cx="${cx}" cy="${cy}" r="100"/>${inner}</g>`;
+  const ring = (cx, cy) => `<circle class="h-ring" cx="${cx}" cy="${cy}" r="31.5"/>`;
+  return art(`<svg class="hero-art bleed" viewBox="-24 -6 390 350" aria-hidden="true" focusable="false">
+    <defs><filter id="hero-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#08140F" flood-opacity=".45"/></filter></defs>
+    ${card(96, 220, -8, img('cookie', 67, 191, 58, 14) + img('moon', 72, 134, 48, -20) + img('mitten', 130, 176, 50, 18) + img('leaf', 107, 245, 50, -30) + img('candle', 36, 246, 48, 8) + ring(37, 201) + img('mushroom', 10, 174, 54, -12))}
+    ${card(246, 110, 7, img('star', 218, 82, 56, -10) + img('mug', 221, 23, 50, 12) + img('fish', 257, 135, 50, -24) + img('apple', 186, 136, 48, 16) + img('house', 163, 67, 48, -6) + ring(305, 91) + img('mushroom', 278, 64, 54, 22))}
+    <g transform="rotate(-6 288 254)"><rect class="h-sticker-edge" x="238" y="241" width="100" height="31" rx="12"/><rect class="h-sticker" x="238" y="238" width="100" height="31" rx="12"/><text class="h-text" x="288" y="259" text-anchor="middle">Same one!</text></g>
+  </svg>`);
+}
 function landingView(){
   const last = store.get(K.room);
-  return h('div', { class:'shell' }, h('div', { class:'panel narrow' },
-    h('div', { class:'brand', style:'margin-bottom:14px' }, logo(), h('span', { text:'Symbol Duel' })),
-    h('p', { text:'Create a game, then send its invite link to your opponent. Everyone who opens that link shares one scoreboard.' }),
-    h('div', { class:'row' },
-      h('button', { class:'btn primary big', type:'button', onclick: () => { location.hash = randomId(20); } }, 'Create a new game'),
-      last && h('button', { class:'btn', type:'button', onclick: () => { location.hash = last; } }, 'Continue my last game')),
-    h('p', { class:'muted small', style:'margin:14px 0 0', text:'Invited by someone? Open the link they sent you instead.' })));
+  return h('div', { class:'col' },
+    h('div', { class:'bar', style:'justify-content:space-between' }, meChip(), soundButton()),
+    heroArt(),
+    h('div', { style:'display:flex;flex-direction:column;gap:10px;margin-top:18px' },
+      h('h1', { class:'wordmark', text:'Tobble' }),
+      h('p', { class:'tagline', text:'A cozy matching game for friends. Find the one picture two cards share, faster than anyone else at the table.' })),
+    h('div', { class:'btn-row', style:'margin-top:auto;padding-top:28px' },
+      h('button', { class:'btn primary', type:'button', onclick: () => { location.hash = randomId(20); } }, icon('plus'), 'Start a new game'),
+      last && h('button', { class:'btn secondary', type:'button', onclick: () => { location.hash = last; } }, icon('enter'), 'Continue my last game'),
+      h('p', { class:'small muted', style:'text-align:center;margin-top:6px', text:'Any number of friends · play whenever you like · about a minute a duel' }),
+      h('p', { class:'small muted', style:'text-align:center' }, 'Invited? Open the link your friend sent you. ',
+        h('button', { class:'link', type:'button', onclick: howToPlay }, 'How to play'))));
 }
 
+/* Who's playing */
 function knownPlayers(){
-  const names = otherPlayers();
-  if (state.player) names.unshift(state.player.name);
-  const unique = [...new Map(names.map(n => [slug(n), n])).values()];
+  const known = otherPlayerList();
+  if (state.player) known.unshift({ key: state.player.key, name: state.player.name });
+  const unique = [...new Map(known.map(p => [p.key, p])).values()];
   if (!unique.length) return [];
-  return [h('p', { class:'muted small', style:'margin-bottom:6px', text:'Already in this game (tap your name to continue as that player):' }),
-    h('div', { class:'row', style:'margin-bottom:14px' }, unique.map(n => h('button', { class:'btn', type:'button',
-      onclick: () => { const f = document.getElementById('name'); f.value = n; f.focus(); } }, n)))];
+  return [h('div', { style:'display:flex;flex-direction:column;gap:10px;margin-top:24px' },
+    h('span', { class:'label', text:'Already at this table' }),
+    h('p', { class:'small muted', style:'margin-top:-4px', text:'Tap your name to carry on as that player.' }),
+    h('div', { class:'known' }, unique.map(p => h('button', { type:'button', onclick: () => {
+      const f = document.getElementById('name');
+      f.value = p.name; f.dispatchEvent(new Event('input'));
+      if (state.pickToken) state.pickToken(tokenOf(p.key));
+      f.focus();
+    } }, tokenEl(tokenOf(p.key)), h('span', { class:'ell', text: p.name })))))];
 }
 function nameView(){
-  const input = h('input', { class:'field', id:'name', type:'text', maxlength:'24', placeholder:'Your name',
-    autocomplete:'nickname', 'aria-label':'Your name', value: state.player ? state.player.name : '' });
-  const form = h('form', { class:'panel narrow' },
-    h('h1', { text:'Who is playing?' }),
-    h('p', { class:'muted', text:'The scoreboard recognises you by this name, so type it the same way on every device.' }),
-    input, h('div', { id:'known' }, knownPlayers()),
-    h('div', { class:'row' }, h('button', { class:'btn primary big', type:'submit' }, 'Continue'),
-      state.player && h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Cancel')));
+  const me = state.player;
+  let token = (me && validToken(me.token)) || validToken(store.get(K.token)) || TOKENS[Math.floor(Math.random() * TOKENS.length)];
+  const clean = v => v.trim().replace(/\s+/g, ' ').slice(0, 24);
+  const input = h('input', { class:'field', id:'name', type:'text', maxlength:'24', placeholder:'e.g. Ema',
+    autocomplete:'nickname', spellcheck:'false', value: me ? me.name : '' });
+  const tokenBtns = TOKENS.map(t => h('button', { type:'button', 'aria-pressed': String(t === token), onclick: () => pick(t) },
+    h('span', { class:'disc' }, h('img', { src: symbolSrc(t), alt:'' })), LABEL[t]));
+  const pick = t => { token = t; tokenBtns.forEach((b, i) => b.setAttribute('aria-pressed', String(TOKENS[i] === t))); };
+  state.pickToken = pick;
+  const submit = h('button', { type:'submit' });
+  const paint = () => {
+    const ok = !!clean(input.value);
+    submit.disabled = !ok;
+    submit.className = 'btn ' + (ok ? 'primary' : 'waiting');
+    submit.replaceChildren(...(ok ? ['Take a seat', icon('arrow')] : ['Type your name to sit down']));
+  };
+  input.addEventListener('input', paint);
+  paint();
+  const form = h('form', { style:'display:flex;flex-direction:column;flex:1' },
+    h('div', { id:'known' }, knownPlayers()),
+    h('div', { style:'display:flex;flex-direction:column;gap:8px;margin-top:24px' },
+      h('label', { class:'label', for:'name', text:'Your name' }), input,
+      h('p', { class:'small muted', text:'The scoreboard knows you by your name, so type it the same way on every phone.' })),
+    h('div', { style:'display:flex;flex-direction:column;gap:12px;margin-top:24px' },
+      h('span', { class:'label', id:'token-label', text:'Pick your token' }),
+      h('div', { class:'tokens', role:'group', 'aria-labelledby':'token-label' }, tokenBtns)),
+    h('div', { style:'margin-top:auto;padding-top:28px' }, submit));
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const name = input.value.trim().replace(/\s+/g, ' ').slice(0, 24);
+    const name = clean(input.value);
     if (!name){ input.focus(); return; }
-    setPlayer(name);
+    setPlayer(name, token);
   });
-  return h('div', { class:'shell' }, h('div', { id:'name-status', class:'narrow', style:'margin-top:4vh' }, state.error && errorNote()),
-    h('div', { style: state.error ? '' : 'margin-top:-4vh' }, form));
+  const back = me ? () => { state.screen = state.room ? 'lobby' : 'landing'; render(); }
+    : state.room && !isDemo() ? () => { location.hash = ''; } : null;
+  return h('div', { class:'col' },
+    h('div', { class:'bar' }, back && h('button', { class:'icon-btn', type:'button', 'aria-label':'Back', onclick: back }, icon('back')),
+      h('h1', { text:'Who’s playing?' })),
+    h('div', { id:'name-status' }, state.error && errorNote()),
+    form);
 }
 
+/* Notes */
 function setupGuide(){
   const sql = h('pre', { id:'setup-sql', tabindex:'0', text: SETUP_SQL });
   return h('div', { class:'note' },
     h('b', { text:'Demo mode. ' }),
-    'Scores stay in this browser only. To try a full duel on your own, play one, tap “change” next to your name, and play it again as a second player.',
-    details('setup', '', 'Set up the shared scoreboard with Supabase (about 10 minutes, free)',
+    'Scores stay in this browser only. To try a duel against yourself, play one, tap your name at the top to switch players, and play it again.',
+    details('setup', '', 'Set up the shared scoreboard (Supabase, free, about 10 minutes)',
       h('ol', null,
-        h('li', null, 'In the Supabase dashboard create a new project on the free plan, or use one you already have: everything the setup creates is named ',
+        h('li', null, 'In the Supabase dashboard create a project on the free plan, or use one you already have: everything the setup creates is named ',
           h('code', { text:'tobble_…' }), '. Leave the Data API switched on, using the ', h('code', { text:'public' }), ' schema (the default).'),
         h('li', null, 'Open the ', h('b', { text:'SQL Editor' }), ', start a new query, paste the setup script below and click ', h('b', { text:'Run' }),
           '. It should end with “Success. No rows returned”.', sql, copyButton('Copy setup script', () => SETUP_SQL, sql)),
         h('li', null, 'Click ', h('b', { text:'Connect' }), ' at the top of the project and copy the project URL and the publishable key (it starts with ',
-          h('code', { text:'sb_publishable_' }), '). The key is also under ', h('b', { text:'Settings → API Keys' }), '. Never use the secret key here.'),
-        h('li', null, 'Open this file in a text editor. Near the top of the script, paste them between the quotes of ',
+          h('code', { text:'sb_publishable_' }), '). Never use the secret key here.'),
+        h('li', null, 'Paste them into ', h('code', { text:'index.html' }), ' between the quotes of ',
           h('code', { text:"const SUPABASE_URL = '';" }), ' and ', h('code', { text:"const SUPABASE_KEY = '';" }), '.'),
-        h('li', null, 'Put the file online. The quickest way is Netlify Drop: rename the file to ', h('code', { text:'index.html' }),
-          ', put it alone in a folder, drag the folder onto app.netlify.com/drop, then sign in or sign up to claim the site (unclaimed sites are password-protected and deleted after an hour). Any other static web host works too.'),
-        h('li', null, 'Open the address, create a game and send the invite link to your opponent.')),
-      h('p', { class:'muted small', style:'margin:8px 0 0', text:'Free Supabase projects pause after about a week with too little activity. If that happens, resume the project in the Supabase dashboard. The scores are kept.' })));
+        h('li', null, 'Put the site online: push it to GitHub, where the Pages workflow publishes ', h('code', { text:'index.html' }), ' and ',
+          h('code', { text:'assets/' }), ', or upload both to any static web host.'),
+        h('li', null, 'Open the address, start a game and send the invite link to your friends.')),
+      h('p', { class:'small muted', style:'margin-top:8px', text:'Free Supabase projects pause after about a week with too little activity. If that happens, resume the project in the Supabase dashboard; the scores are kept.' })));
 }
 const ERROR_HINTS = {
   'paused': 'The Supabase project is paused because nobody played for about a week. Its owner can resume it in the Supabase dashboard; the scores are kept.',
@@ -880,97 +1246,122 @@ function errorNote(){
   return h('div', { class:'note warn', role:'status' }, h('b', { text:'Scoreboard problem. ' }), hint, h('span', { class:'muted small', text:` (${code})` }));
 }
 
-function resultChips(row){
-  const me = state.player.key;
-  return h('div', { class:'chips wide' }, row.done.map(r => h('span', { class:'chip' + (row.winners.includes(r.key) ? ' win' : '') },
-    h('span', { text: r.key === me ? 'You' : r.name }), h('span', { class:'time', text: r.dnf ? 'out of time' : fmt(r.timeMs) }),
-    row.winners.includes(r.key) && h('span', { text: row.winners.length > 1 ? 'tie' : '🏆' }))));
+/* The table */
+function timeChip(r, row){
+  const you = r.key === state.player.key, won = row.winners.includes(r.key);
+  return h('span', { class:'chip ' + (you ? 'you' : 'them') }, won && icon('check', 14, 3),
+    h('span', { class:'ell', style:'max-width:9em', text: you ? 'You' : r.name }), h('span', { text: r.dnf ? 'out of time' : fmt(r.timeMs) }));
 }
 function roundsTable(row){
   const me = state.player.key, players = row.done;
   const cell = (r, i) => {
     const v = r.splits[i];
-    const fastest = Number.isFinite(v) && players.every(o => !Number.isFinite(o.splits[i]) || o.splits[i] >= v);
-    return h('td', { class: fastest && players.length > 1 ? 'best' : '', text: Number.isFinite(v) ? (v / 1000).toFixed(2) : '—' });
+    const fastest = players.length > 1 && Number.isFinite(v) && players.every(o => !Number.isFinite(o.splits[i]) || o.splits[i] >= v);
+    return h('td', { class: fastest ? 'best' + (r.key === me ? '' : ' them') : '', text: Number.isFinite(v) ? (v / 1000).toFixed(2) : '—' });
   };
   return h('table', null,
-    h('thead', null, h('tr', null, h('th', { text:'Pair' }), players.map(r => h('th', { text: r.key === me ? 'You' : r.name })))),
+    h('thead', null, h('tr', null, h('th', { text:'Pair' }), players.map(r => h('th', { title: r.name, text: r.key === me ? 'You' : r.name })))),
     h('tbody', null,
       Array.from({ length: PAIRS }, (_, i) => h('tr', null, h('td', { text: String(i + 1) }), players.map(r => cell(r, i)))),
       h('tr', null, h('td', { text:'Wrong taps' }), players.map(r => h('td', { text: r.mistakes ? `${r.mistakes} (+${r.mistakes * PENALTY_MS / 1000} s)` : '0' }))),
-      h('tr', null, h('td', { text:'Total' }), players.map(r => h('td', { class:'time', text: r.dnf ? 'out of time' : fmt(r.timeMs) })))));
+      h('tr', null, h('td', { text:'Total' }), players.map(r => h('td', { class:'total', text: r.dnf ? 'out of time' : fmt(r.timeMs) })))));
 }
 function duelItem(row){
   const d = row.duel, me = state.player.key;
-  const by = d.createdBy ? (slug(d.createdBy) === me ? 'Started by you' : 'Started by ' + d.createdBy) + ' · ' : '';
-  const head = h('div', null, h('div', { class:'t', text:`Duel #${row.no}` }), h('div', { class:'muted small', text: by + fmtWhen(d.createdAt) }));
+  const by = d.createdBy ? (slug(d.createdBy) === me ? 'Dealt by you' : 'Dealt by ' + d.createdBy) : '';
+  const head = [h('span', { class:'duel-disc', 'aria-hidden':'true', text: String(row.no) }),
+    h('span', { class:'grow' }, h('span', { class:'title', text:`Duel #${row.no}` }),
+      h('span', { class:'sub ell', text: [by, fmtWhen(d.createdAt)].filter(Boolean).join(' · ') }))];
   if (row.status === 'todo' || row.status === 'playing'){
     const names = row.othersDone.map(r => r.name);
     const line = row.status === 'playing' ? 'In progress. The clock is still running.'
       : names.length ? `${listNames(names)} already played. Their time stays hidden until you finish.` : 'Nobody has played it yet.';
-    return h('li', { class:'duel mine' }, head,
-      h('button', { class:'btn primary', type:'button', onclick: () => openDuel(d.id) }, row.status === 'playing' ? 'Resume' : 'Play'),
-      h('div', { class:'small wide', text: line }));
+    return h('li', { class:'duel mine prow' }, head,
+      h('button', { class:'btn small primary', type:'button', onclick: () => openDuel(d.id) }, row.status === 'playing' ? 'Resume' : 'Play'),
+      h('span', { class:'sub wide', text: line }));
   }
   if (row.status === 'waiting'){
-    return h('li', { class:'duel' }, head, h('span', { class:'time', text: row.mine.dnf ? 'out of time' : fmt(row.mine.timeMs) }),
-      h('div', { class:'muted small wide', text: isUnsaved(d.id)
-        ? 'Not saved to the scoreboard yet. It is sent again when the connection is back.' : 'Waiting for your opponent to play it.' }));
+    return h('li', { class:'duel prow' }, head,
+      h('span', { class:'num' + (row.mine.dnf ? ' out' : ''), text: row.mine.dnf ? 'out of time' : fmt(row.mine.timeMs) }),
+      h('span', { class:'sub wide', text: isUnsaved(d.id)
+        ? 'Not saved to the scoreboard yet. It is sent again when the connection is back.' : 'Waiting for your friends to play it.' }));
   }
-  const won = row.winners.includes(me);
-  return h('li', { class:'duel' }, head,
-    h('span', { class:'small', style:'font-weight:800', text: won ? (row.winners.length > 1 ? 'Tie' : 'You won') : 'You lost' }),
-    resultChips(row), h('div', { class:'wide' }, details('rounds:' + d.id, 'rounds', 'Pair by pair', roundsTable(row))));
+  const won = row.winners.includes(me), tie = row.winners.length > 1;
+  const winner = row.done.find(r => row.winners.includes(r.key) && r.key !== me);
+  const outcome = won ? (tie ? 'Tie' : 'You won') : winner ? `${winner.name} won` : 'You lost';
+  return h('li', { class:'duel prow' }, head,
+    h('span', { class:'chip ell ' + (won ? 'you' : 'them'), style:'max-width:45%', text: outcome }),
+    h('div', { class:'times wide' }, row.done.map(r => timeChip(r, row))),
+    h('div', { class:'wide' }, details('rounds:' + d.id, 'pairs', 'Pair by pair', h('div', { class:'scroll-x' }, roundsTable(row)))));
 }
-function boardPanel(board){
-  const me = state.player.key, ties = board.some(p => p.ties);
-  return h('section', { class:'panel' }, h('h2', { text:'Scoreboard' }),
-    board.length ? h('table', null,
-      h('thead', null, h('tr', null, h('th', { text:'Player' }), h('th', { text:'Won' }), h('th', { text:'Lost' }), ties && h('th', { text:'Tied' }), h('th', { text:'Average' }), h('th', { text:'Best' }))),
-      h('tbody', null, board.map(p => h('tr', null,
-        h('td', null, h('b', { text: p.name }), p.key === me && h('span', { class:'you', text:'you' })),
-        h('td', { text: String(p.wins) }), h('td', { text: String(p.losses) }), ties && h('td', { text: String(p.ties) }),
-        h('td', { text: p.n ? fmt(p.sum / p.n) : '—' }), h('td', { text: fmt(p.best) })))))
-    : h('p', { class:'muted', style:'margin:0', text:'No finished duels yet. A duel counts once two players have played it.' }));
+function boardSection(board){
+  const me = state.player.key;
+  return h('section', { class:'section', id:'board', 'aria-labelledby':'board-h' }, h('h2', { class:'label', id:'board-h', text:'Scoreboard' }),
+    board.length ? h('ul', { class:'rows' }, board.map(p => {
+      const you = p.key === me, bits = [`${p.wins} won`, `${p.losses} lost`];
+      if (p.ties) bits.push(`${p.ties} tied`);
+      bits.push(p.n ? `avg ${fmt(p.sum / p.n)}` : 'no time yet');
+      if (p.best != null) bits.push(`best ${fmt(p.best)}`);
+      return h('li', { class:'player prow' }, tokenEl(tokenOf(p.key), !you, 'big'),
+        h('span', { class:'grow' },
+          h('span', { class:'title' }, h('span', { class:'ell', text: p.name }), you && h('span', { class:'chip you tiny', text:'you' })),
+          h('span', { class:'sub', text: bits.join(' · ') })),
+        h('span', { class:'num' + (you ? '' : ' them') }, String(p.wins), h('small', { text: p.wins === 1 ? 'win' : 'wins' })));
+    })) : h('p', { class:'empty', text:'No finished duels yet. A duel counts once two players have played it.' }));
+}
+function invitePanel(){
+  const link = h('input', { class:'field link-field', type:'text', readonly: true, value: location.href, 'aria-label':'Invite link' });
+  const copyBtn = h('button', { class:'ghost', type:'button' });
+  const idle = () => copyBtn.replaceChildren(icon('copy', 18), 'Copy link');
+  copyBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(location.href); copyBtn.replaceChildren(icon('check', 18, 2.4), 'Copied!'); }
+    catch { link.focus(); link.select(); copyBtn.textContent = 'Selected, now copy'; }
+    setTimeout(idle, 1600);
+  });
+  idle();
+  const shareBtn = h('button', { class:'ghost', type:'button' }, icon('share', 18), 'Send invite');
+  shareBtn.addEventListener('click', async () => {
+    const data = { title:'Tobble', text:'Come and play Tobble with me: find the one picture two cards share.', url: location.href };
+    if (navigator.share){
+      try { await navigator.share(data); return; } catch (e){ if (e && e.name === 'AbortError') return; }
+    }
+    copyBtn.click();
+  });
+  return h('section', { class:'panel', style:'margin-top:22px;display:flex;flex-direction:column;gap:12px' },
+    h('h2', { class:'label', text:'Invite friends' }),
+    h('p', { class:'small soft', text:'Send this link once. Everyone who opens it joins this table and its scoreboard.' }),
+    link, h('div', { class:'pair-btns' }, copyBtn, shareBtn));
 }
 function lobbyView(){
   const rows = summarize(), board = leaderboard(rows);
   const mine = rows.filter(r => r.status === 'todo' || r.status === 'playing').reverse();
   const waiting = rows.filter(r => r.status === 'waiting').reverse();
   const done = rows.filter(r => r.status === 'done').reverse();
-  const title = !state.loaded ? 'Symbol Duel' : mine.length === 1 ? 'One duel is waiting for you'
-    : mine.length ? `${mine.length} duels are waiting for you` : 'Challenge your opponent';
-  const newBtn = h('button', { class:'btn primary big', type:'button', disabled: !state.loaded }, 'New duel');
+  const title = !state.loaded ? 'Getting the table ready…' : mine.length === 1 ? 'One duel is waiting for you'
+    : mine.length ? `${mine.length} duels are waiting for you` : 'Challenge your friends';
+  const newBtn = h('button', { class:'btn primary', type:'button', disabled: !state.loaded }, icon('plus'), 'Deal a new duel');
   newBtn.addEventListener('click', () => newDuel(newBtn));
-  const section = (label, list, empty) => h('section', { class:'panel' }, h('h2', { text: label }),
-    list.length ? h('ul', { class:'list' }, list.map(duelItem)) : h('p', { class:'muted', style:'margin:0', text: empty }));
-  const link = h('input', { class:'field', type:'text', readonly: true, value: location.href, 'aria-label':'Invite link' });
-
-  return h('div', { class:'shell' }, topbar(),
+  const section = (label, list, empty) => h('section', { class:'section' }, h('h2', { class:'label', text: label }),
+    list.length ? h('ul', { class:'rows' }, list.map(duelItem)) : h('p', { class:'empty', text: empty }));
+  return h('div', { class:'col table-col' },
+    h('div', { class:'bar' },
+      !isDemo() && h('button', { class:'icon-btn', type:'button', 'aria-label':'Leave the table', onclick: () => { location.hash = ''; } }, icon('back')),
+      h('h1', { class:'ell', text:'The table' }), meChip()),
     isDemo() && setupGuide(),
     state.error && errorNote(),
-    h('section', { class:'panel hero' },
-      h('div', null, h('h1', { text: title }),
-        h('p', { class:'muted', text:`Ten pairs of cards. Find the one symbol each pair shares, as fast as you can. Your opponent gets exactly the same cards, whenever they have time.` })),
-      newBtn),
+    h('div', { style:'margin-top:22px;display:flex;flex-direction:column;gap:8px' },
+      h('h2', { class:'status-title', text: title }),
+      h('p', { class:'soft', text:`${PAIRS} pairs of cards. Find the one picture each pair shares, as fast as you can. Your friends get exactly the same cards, whenever they have time.` })),
+    !isDemo() && invitePanel(),
     !state.loaded
-      ? h('p', { class:'muted', style:'margin-top:18px', text: state.slow ? 'Still trying to reach the scoreboard…' : 'Loading duels…' })
-      : h('div', { class:'grid' },
-          h('div', null,
-            section('Your turn', mine, 'Nothing is waiting for you. Start a new duel.'),
-            waiting.length ? section('Waiting for your opponent', waiting, '') : null,
-            section('Finished', done.slice(0, 20), 'Finished duels show up here with both times.')),
-          h('div', null,
-            boardPanel(board),
-            !isDemo() && h('section', { class:'panel' }, h('h2', { text:'Invite link' }),
-              h('p', { class:'muted small', text:'Send this once. Anyone who opens it joins this game and its scoreboard.' }),
-              h('div', { class:'invite' }, link, copyButton('Copy', () => location.href, link))),
-            h('section', { class:'panel' }, h('h2', { text:'How a duel works' }),
-              h('ul', { class:'plain small' },
-                h('li', { text:'Either player can start a duel at any time.' }),
-                h('li', { text:'The other finds it under “Your turn” next time they open the game.' }),
-                h('li', { text:`Fastest total time wins. Every wrong tap adds ${PENALTY_MS / 1000} seconds.` }),
-                h('li', { text:'The clock cannot be paused once you start.' }))))));
+      ? h('p', { class:'empty', style:'margin-top:24px', text: state.slow ? 'Still trying to reach the scoreboard…' : 'Loading duels…' })
+      : [section('Your turn', mine, 'Nothing is waiting for you. Deal a new duel and your friends will find it here.'),
+         waiting.length ? section('Waiting for friends', waiting, '') : null,
+         section('Finished', done.slice(0, 20), 'Finished duels show up here with everyone’s times.'),
+         boardSection(board)],
+    h('p', { class:'small muted', style:'margin-top:20px;text-align:center' },
+      h('button', { class:'link', type:'button', onclick: howToPlay }, 'How to play'), ' · ', soundLink()),
+    h('div', { class:'dock' }, newBtn));
 }
 async function newDuel(btn){
   btn.disabled = true;
@@ -987,17 +1378,69 @@ async function newDuel(btn){
   }
 }
 
+/* Results */
+function fanArt(stickers){
+  const img = (id, x, y, s, rot) => `<image href="${symbolSrc(id)}" x="${x}" y="${y}" width="${s}" height="${s}" transform="rotate(${rot} ${x + s / 2} ${y + s / 2})"/>`;
+  const card = (cx, cy, rot, inner) => `<g transform="rotate(${rot} ${cx} ${cy})"><circle class="h-edge" cx="${cx}" cy="${cy + 5}" r="75" filter="url(#fan-shadow)"/>` +
+    `<circle class="h-card" cx="${cx}" cy="${cy}" r="75"/><circle class="h-stitch" cx="${cx}" cy="${cy}" r="67"/>${inner}</g>`;
+  const sticker = ([token, them], cx, cy, r, rot) => `<g transform="rotate(${rot} ${cx} ${cy})"><circle class="h-tok ${them ? 'them' : 'you'}" cx="${cx}" cy="${cy}" r="${r + 2}" filter="url(#fan-shadow)"/>` +
+    img(token, cx - r * 0.7, cy - r * 0.7, r * 1.4, 0) + '</g>';
+  const tokens = stickers.length > 1
+    ? sticker(stickers[0], 94, 166, 30, -8) + sticker(stickers[1], 252, 166, 30, 8)
+    : stickers.length ? sticker(stickers[0], 251, 169, 33, 8) : '';
+  return art(`<svg class="fan bleed" viewBox="-24 4 390 214" aria-hidden="true" focusable="false">
+    <defs><filter id="fan-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="9" stdDeviation="11" flood-color="#08140F" flood-opacity=".45"/></filter></defs>
+    ${card(123, 105, -16, img('leaf', 76, 64, 44, -20) + img('moon', 92, 114, 40, 0))}
+    ${card(219, 105, 14, img('candle', 224, 60, 42, 10) + img('key', 220, 112, 42, 0))}
+    ${card(171, 119, -3, img('star', 147, 62, 48, -8) + img('heart', 120, 114, 44, -16) + img('daisy', 176, 116, 46, 12))}
+    ${tokens}</svg>`);
+}
 function resultView(){
   const shown = state.shown, me = state.player.key;
   const row = shown && summarize().find(r => r.duel.id === shown.duelId);
   if (!row || !row.mine || !isDone(row.mine)){ state.screen = 'lobby'; return lobbyView(); }
   const mine = row.mine, others = otherPlayers(), unsaved = isUnsaved(row.duel.id);
-  const winner = row.done.find(r => row.winners.includes(r.key));
-  const headline = mine.dnf ? 'Out of time'
-    : !row.othersDone.length ? 'Done!'
-    : row.winners.includes(me) ? (row.winners.length > 1 ? 'It’s a tie!' : 'You win!')
-    : winner ? `${winner.name} wins this one` : 'Done!';
-  const again = h('button', { class:'btn primary', type:'button' }, 'New duel');
+  const iWon = row.winners.includes(me), tie = row.winners.length > 1;
+  const winner = row.done.find(r => row.winners.includes(r.key) && r.key !== me) || null;
+  const rival = row.othersDone.filter(r => !r.dnf).sort((a, b) => a.timeMs - b.timeMs)[0] || null;
+  let headline, line;
+  if (mine.dnf){ headline = 'Out of time'; line = 'This duel wasn’t finished within 10 minutes.'; }
+  else if (!row.othersDone.length){
+    headline = 'Done!';
+    line = `${others.length ? listNames(others) : 'Your friends'} will find this duel waiting. Your time stays hidden until they’ve played it.`;
+  }
+  else if (iWon && tie){ headline = 'A perfect tie!'; line = `${fmt(mine.timeMs)} each. Two cocoas, then.`; }
+  else if (iWon){
+    headline = 'You win!';
+    line = !rival ? `${listNames(row.othersDone.map(r => r.name))} ran out of time. Cocoa’s on them.`
+      : row.othersDone.length === 1 ? `${fmt(mine.timeMs)} to ${fmt(rival.timeMs)}. ${rival.name} owes you a cocoa.`
+      : `Fastest of ${row.done.length}. Everyone else owes you a cocoa.`;
+  }
+  else if (winner){ headline = `${winner.name} wins!`; line = `${fmt(winner.timeMs)} to ${fmt(mine.timeMs)}. You owe ${winner.name} a cocoa.`; }
+  else { headline = 'Done!'; line = ''; }
+  const stickers = mine.dnf && !winner ? []
+    : !row.othersDone.length || (iWon && !tie) ? [[myToken(), false]]
+    : iWon && tie ? [[myToken(), false], [tokenOf(winner ? winner.key : row.othersDone[0].key), true]]
+    : winner ? [[tokenOf(winner.key), true]] : [];
+
+  const timed = row.done.filter(r => !r.dnf), best = timed.length ? Math.min(...timed.map(r => r.timeMs)) : 0;
+  const bars = h('ul', { class:'bars', 'aria-label':'Times' },
+    row.done.map(r => {
+      const you = r.key === me, pct = r.dnf ? 0 : Math.max(8, Math.round(best / r.timeMs * 100));
+      return h('li', { class: you ? 'you' : 'them' }, tokenEl(tokenOf(r.key), !you),
+        h('span', { class:'grow' },
+          h('span', { class:'who' }, h('span', { class:'ell', text: you ? 'You' : r.name }),
+            row.winners.includes(r.key) && h('span', { class:'winner' + (you ? '' : ' them'), text: tie ? 'Tie' : 'Winner' })),
+          h('span', { class:'track' }, h('span', { class:'fill', style:`width:${pct}%` }))),
+        h('span', { class:'t' + (r.dnf ? ' out' : '') + (you ? ' bigtime' : ''), text: r.dnf ? 'out of time' : fmt(r.timeMs) }));
+    }),
+    !row.othersDone.length && h('li', { class:'waiting' }, h('span', { class:'wait-disc', 'aria-hidden':'true' }, h('i'), h('i'), h('i')),
+      h('span', { class:'grow' },
+        h('span', { class:'who' }, h('span', { class:'ell', text: others.length ? `Waiting for ${listNames(others)}…` : 'Waiting for your friends…' })),
+        h('span', { class:'small muted', text: others.length ? 'Their times show up here by themselves.' : 'Send them the invite link from the table.' }))));
+  const fastest = mine.splits.length ? Math.min(...mine.splits) : null;
+
+  const again = h('button', { class:'btn primary', type:'button' }, icon('plus'), 'Deal a new duel');
   again.addEventListener('click', () => newDuel(again));
   const retry = h('button', { class:'link', type:'button' }, 'Try again');
   retry.addEventListener('click', () => {
@@ -1006,143 +1449,230 @@ function resultView(){
     resend(row.duel.id).then(() => { shown.saving = false; }, () => { shown.saving = false; shown.failed = true; })
       .then(() => { if (state.screen === 'result' && state.shown === shown) render(); });
   });
-  return h('div', { class:'shell' }, topbar(),
-    h('section', { class:'panel result' },
-      h('div', { class:'muted', text:`Duel #${row.no}` }),
-      h('h1', { text: headline }),
-      !mine.dnf && h('div', { class:'bigtime', text: fmt(mine.timeMs) }),
-      h('p', { class:'muted', text: mine.dnf ? 'This duel was not finished within 10 minutes.'
-        : mine.mistakes ? `${mine.mistakes} wrong ${mine.mistakes === 1 ? 'tap' : 'taps'}, ${mine.mistakes * PENALTY_MS / 1000} seconds of penalty included.` : 'No wrong taps.' }),
-      unsaved && shown.failed && h('p', { style:'color:var(--warn)' }, 'Your result is not saved to the scoreboard yet.', retry),
-      unsaved && shown.saving && h('p', { class:'muted small', text:'Saving your result…' }),
-      row.othersDone.length
-        ? h('div', { style:'text-align:left;margin-top:14px' }, roundsTable(row))
-        : h('p', { text: `${others.length ? listNames(others) : 'Your opponent'} will find this duel waiting next time they open the game. Your time stays hidden from them until they have played.` }),
-      h('div', { class:'row' }, h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Back to all duels'), again)));
+  return h('div', { class:'col result' },
+    h('span', { class:'caption', style:'margin-top:14px', text:`Duel #${row.no} · ${mine.dnf ? 'out of time' : `all ${PAIRS} pairs`}` }),
+    fanArt(stickers),
+    h('div', { class:'head' }, h('h1', { text: headline }), line && h('p', { class:'soft', text: line })),
+    bars,
+    h('div', { class:'tiles' },
+      h('div', { class:'tile' }, h('span', { class:'caption', text:'Fastest pair' }), h('b', { text: fastest == null ? '—' : `${(fastest / 1000).toFixed(1)} s` })),
+      h('div', { class:'tile' }, h('span', { class:'caption', text:'Wrong taps' }),
+        h('b', { text: mine.mistakes ? `${mine.mistakes} (+${mine.mistakes * PENALTY_MS / 1000} s)` : 'None' }))),
+    unsaved && shown.failed && h('p', { class:'save-note bad' }, 'Your result is not saved to the scoreboard yet. ', retry),
+    unsaved && shown.saving && h('p', { class:'save-note', text:'Saving your result…' }),
+    row.othersDone.length ? h('section', { class:'section' }, h('h2', { class:'label', text:'Pair by pair' }),
+      h('div', { class:'panel scroll-x', style:'padding:10px 14px' }, roundsTable(row))) : null,
+    h('div', { class:'btn-row' }, again,
+      h('button', { class:'btn secondary slim', type:'button', onclick: () => { state.screen = 'lobby'; render(); window.scrollTo(0, 0); } }, 'Back to the table')));
 }
 
-/* ─────────────────────────── 8. PLAYING A DUEL ─────────────────────────── */
+/* ─────────────────────────── 8. PLAYING A DUEL ───────────────────────────
+   Your card is card k, the pile is card k + 1. Find their one shared picture and the pile card
+   slides down to become your card while the next pile card is dealt. */
+const HIT_MS = 300;   // how long a found picture stays ringed before the cards move on
 function openDuel(id){
   const duel = state.duels.find(d => d.id === id);
   if (!duel || !state.player) return;
   const me = state.player, resultId = duel.id + '_' + me.key;
   const stored = state.results.find(r => r.id === resultId);
   if ((stored && isDone(stored)) || state.local.final[duel.id]){ state.screen = 'lobby'; render(); return; }
-  const no = summarize().find(r => r.duel.id === id).no;
+  const row = summarize().find(r => r.duel.id === id), no = row.no;
   const cards = buildDuel(duel.seed);
   const saved = state.local.prog[duel.id] || null;
   const p = {
     idx: saved ? Math.min(saved.idx, PAIRS - 1) : 0, mistakes: saved ? saved.mistakes : 0, splits: saved ? saved.splits.slice() : [],
     startedAt: (saved && saved.startedAt) || (stored && stored.startedAt) || null,
-    locked: true, over: false, raf: 0, lastMiss: 0,
+    locked: true, over: false, raf: 0, lastMiss: 0, timers: [], countdown: 0,
   };
-  const shown = { a: -1, b: -1 };
-  const start = () => ({ id: resultId, duelId: duel.id, key: me.key, name: me.name, startedAt: p.startedAt });
+  const later = (fn, ms) => { p.timers.push(setTimeout(fn, ms)); };
+  const start = () => ({ id: resultId, duelId: duel.id, key: me.key, name: me.name, startedAt: p.startedAt, token: myToken() });
   const persist = () => { state.local.prog[duel.id] = { startedAt: p.startedAt, idx: p.idx, mistakes: p.mistakes, splits: p.splits }; saveLocal(); };
   const warn = e => { e.preventDefault(); e.returnValue = ''; };
+  const compact = window.matchMedia('(max-height: 799px)');
 
-  const dots = Array.from({ length: PAIRS }, (_, i) => h('i', { class: i < p.idx ? 'on' : '' }));
-  const clock = h('span', { class:'clock', text:'0.0' });
+  // top bar
+  const leftNum = h('span');
+  const leftChip = h('span', { class:'left-chip' }, icon('pile', 18, 2), leftNum);
+  const title = h('span', { class:'play-title', text:`Duel #${no}` });
+  const mid = h('div', { class:'play-mid' }, title);
+  // who already played this duel (their times stay hidden)
+  const friends = row.othersDone;
+  const friendsRow = friends.length
+    ? h('div', { class:'friends prow' }, h('span', { class:'tokens-stack' }, friends.slice(0, 3).map(r => tokenEl(tokenOf(r.key), true))),
+        h('span', { class:'grow' }, h('span', { class:'title' }, h('span', { class:'ell', text: friends.length === 1 ? friends[0].name : `${friends.length} friends` })),
+          h('span', { class:'sub', text:'Already played · hidden until you finish' })),
+        h('span', { class:'pill them', 'aria-label':'Their time is hidden' }, h('b', { text:'?' }), h('small', { text:'sec' })))
+    : h('div', { class:'friends prow dashed' }, h('span', { class:'wait-disc', 'aria-hidden':'true' }, h('i'), h('i'), h('i')),
+        h('span', { class:'grow' }, h('span', { class:'title soft', text:'First to play' }), h('span', { class:'sub', text:'Your time is the one to beat' })));
+  // the cards
+  const pileSlot = h('div', { class:'slot pile-slot' }), youSlot = h('div', { class:'slot you-slot' });
+  const toast = h('span', { class:'toast hint', text:'Find the one picture both cards share' });
+  // your row, with the clock
+  const clock = h('b', { class:'clock', text:'0.0' });
   const pen = h('span', { class:'pen', 'aria-hidden':'true', text:`+${PENALTY_MS / 1000} s` });
-  const miss = h('b', { text: String(p.mistakes) });
-  const slotA = h('div', null, h('div', { class:'card blank' })), slotB = h('div', null, h('div', { class:'card blank' }));
+  const clockPill = h('span', { class:'pill you', title:'Your time' }, clock, h('small', { text:'sec' }), pen);
+  const misses = h('span', { class:'misses' }), missWord = h('span');
+  const meRight = h('span', { style:'display:flex' });
   const overlay = h('div', { class:'overlay' });
+  const root = h('div', { class:'play', 'data-pair': String(p.idx), 'data-ready':'0' },
+    h('header', { class:'bar play-bar' },
+      h('button', { class:'icon-btn', type:'button', 'aria-label':'Leave the duel', onclick: askLeave }, icon('x', 20, 2.4)), mid, leftChip),
+    friendsRow,
+    h('main', { class:'stage' }, h('span', { class:'caption', text:'The pile' }), pileSlot,
+      h('div', { class:'toastline', role:'status', 'aria-live':'polite' }, toast), youSlot),
+    h('div', { class:'me prow' }, tokenEl(myToken()),
+      h('span', { class:'grow' }, h('span', { class:'title', text:'You' }), h('span', { class:'sub' }, 'Your card · ', misses, missWord)), meRight),
+    overlay);
+  if (closeOpenSheet) closeOpenSheet();
   state.screen = 'play';
-  $app.replaceChildren(h('div', { class:'play' },
-    h('header', { class:'hud' }, h('div', { class:'dots', role:'img', 'aria-label':`Pair progress, ${PAIRS} pairs` }, dots),
-      h('div', { class:'clockwrap' }, clock, pen), h('div', { class:'miss' }, 'Wrong taps', miss)),
-    h('main', { class:'stage' }, slotA, slotB), overlay));
+  state.stopPlay = cleanup;
+  $app.replaceChildren(root);
+  window.scrollTo(0, 0);
 
-  function cardEl(card){
-    const el = h('div', { class:'card pop' });
-    for (const it of card.items){
+  function placeClock(){
+    if (compact.matches) mid.replaceChildren(clockPill);
+    else { mid.replaceChildren(title); meRight.replaceChildren(clockPill); }
+  }
+  function paintLeft(){
+    leftNum.textContent = `${PAIRS - p.idx} left`;
+    leftChip.setAttribute('aria-label', `${PAIRS - p.idx} of ${PAIRS} pairs left`);
+  }
+  function paintMisses(){
+    misses.textContent = String(p.mistakes);
+    missWord.textContent = p.mistakes === 1 ? ' wrong tap' : ' wrong taps';
+  }
+  function restart(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function setToast(kind, text){ toast.className = 'toast ' + kind; toast.textContent = text; restart(toast, 'pop'); }
+  function showClock(){
+    if (p.startedAt != null) clock.textContent = ((Date.now() - p.startedAt + p.mistakes * PENALTY_MS) / 1000).toFixed(1);
+  }
+  function cardEl(card, where){
+    const el = h('div', { class:`card ${where}${card ? '' : ' blank'}`, role:'group', 'aria-label': where === 'pile' ? 'The pile card' : 'Your card' });
+    const pct = v => v.toFixed(2) + '%';
+    for (const it of card ? card.items : []){
       const btn = h('button', { class:'sym', type:'button', 'aria-label': LABEL[it.id], 'data-id': it.id,
-        style:`left:${(50 + it.x * 100).toFixed(2)}%;top:${(50 + it.y * 100).toFixed(2)}%;--s:${(it.size * 2).toFixed(3)};--r:${it.tilt}deg` },
-        h('img', { src:`assets/symbols/${it.id}.svg`, alt:'', draggable:'false' }));
+        style:`left:${pct(50 + (it.x - it.size / 2) * 100)};top:${pct(50 + (it.y - it.size / 2) * 100)};` +
+              `width:${pct(it.size * 100)};height:${pct(it.size * 100)};--tilt:${it.tilt}deg` },
+        h('img', { src: symbolSrc(it.id), alt:'', draggable:'false' }));
       // React on press, not release, so a tap counts the moment the finger lands.
-      btn.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button === 0) pick(it.id, btn); });
-      btn.addEventListener('click', e => { if (e.detail === 0) pick(it.id, btn); });   // keyboard
+      btn.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button === 0) pick(it.id, btn, where); });
+      btn.addEventListener('click', e => { if (e.detail === 0) pick(it.id, btn, where); });   // keyboard
       el.append(btn);
     }
     return el;
   }
-  // The card that stays keeps its place; the new card alternates between the two slots.
-  function showPair(){
-    const a = p.idx % 2 === 0 ? p.idx : p.idx + 1, b = p.idx % 2 === 0 ? p.idx + 1 : p.idx;
-    for (const [slot, name, index] of [[slotA, 'a', a], [slotB, 'b', b]]){
-      if (shown[name] !== index){ slot.replaceChildren(cardEl(cards[index])); shown[name] = index; }
-      else slot.querySelectorAll('.sym').forEach(s => s.classList.remove('hit', 'miss'));
-    }
+  function showPair(motion){
+    const you = cardEl(cards[p.idx], 'you'), pile = cardEl(cards[p.idx + 1], 'pile');
+    if (motion === 'slide'){
+      const from = pileSlot.getBoundingClientRect(), to = youSlot.getBoundingClientRect();
+      you.style.setProperty('--fx', Math.round(from.left - to.left) + 'px');
+      you.style.setProperty('--fy', Math.round(from.top - to.top) + 'px');
+      you.classList.add('slide');
+    } else if (motion === 'deal') you.classList.add('deal');
+    if (motion) pile.classList.add('deal');
+    youSlot.replaceChildren(you); pileSlot.replaceChildren(pile);
+    root.dataset.pair = String(p.idx);
+    paintLeft();
   }
   function tick(){
     if (p.over) return;
-    const elapsed = Date.now() - p.startedAt;
-    if (elapsed > TIME_LIMIT_MS){ finish(p.startedAt + TIME_LIMIT_MS, true); return; }
-    clock.textContent = ((elapsed + p.mistakes * PENALTY_MS) / 1000).toFixed(1);
+    if (Date.now() - p.startedAt > TIME_LIMIT_MS){ finish(p.startedAt + TIME_LIMIT_MS, true); return; }
+    showClock();
     p.raf = requestAnimationFrame(tick);
   }
-  function pick(id, btn){
+  function pick(id, btn, where){
     if (p.locked || p.over) return;
     const now = Date.now();
-    const common = cards[shown.a].ids.find(x => cards[shown.b].ids.includes(x));
+    const common = cards[p.idx].ids.find(x => cards[p.idx + 1].ids.includes(x));
     if (id === common){
-      p.locked = true;
+      p.locked = true; root.dataset.ready = '0';
       p.splits.push(now - p.startedAt - p.splits.reduce((sum, v) => sum + v, 0));
-      $app.querySelectorAll(`.sym[data-id="${id}"]`).forEach(s => s.classList.add('hit'));
-      dots[p.idx].classList.add('on');
-      if (p.idx === PAIRS - 1){ finish(now, false); return; }
+      root.querySelectorAll(`.sym[data-id="${id}"]`).forEach(s => { s.classList.remove('miss'); s.classList.add('hit'); });
+      const last = p.idx === PAIRS - 1;
+      setToast('good', last ? `${LABEL[id]}! That was the last pair` : `${LABEL[id]}! Next card`);
+      blip('match'); buzz(30);
+      if (last){ finish(now, false); return; }
       p.idx++; persist();
-      setTimeout(() => { if (!p.over){ showPair(); p.locked = false; } }, 380);
+      later(() => {
+        if (p.over) return;
+        showPair('slide'); blip('deal');
+        if (p.idx === PAIRS - 1) setToast('hint', 'Last card in the pile!');
+        p.locked = false; root.dataset.ready = '1';
+      }, HIT_MS);
     } else {
       if (now - p.lastMiss < 250) return;       // ignore an accidental double tap
-      p.lastMiss = now; p.mistakes++; persist();
-      miss.textContent = String(p.mistakes);
-      for (const el of [btn, pen]){ el.classList.remove('miss', 'go'); void el.offsetWidth; }
-      btn.classList.add('miss'); pen.classList.add('go');
+      p.lastMiss = now; p.mistakes++; persist(); paintMisses(); showClock();
+      restart(btn, 'miss'); restart(where === 'pile' ? pileSlot : youSlot, 'shake'); restart(pen, 'go');
+      setToast('bad', `Not that one · +${PENALTY_MS / 1000} s`);
+      blip('miss'); buzz([30, 60, 30]);
+      later(() => btn.classList.remove('miss'), 450);
+      later(() => { if (p.lastMiss === now && !p.locked) setToast('hint', 'Keep looking…'); }, 1000);
     }
   }
-  function finish(now, dnf){
+  function cleanup(){
     p.over = true; p.locked = true;
-    cancelAnimationFrame(p.raf);
+    cancelAnimationFrame(p.raf); clearInterval(p.countdown);
+    p.timers.forEach(clearTimeout); p.timers = [];
     window.removeEventListener('beforeunload', warn);
+    compact.removeEventListener('change', placeClock);
+    if (state.stopPlay === cleanup) state.stopPlay = null;
+  }
+  function finish(now, dnf){
+    cleanup();
     const result = { ...start(), finishedAt: now, mistakes: p.mistakes, splits: p.splits.slice() };
     if (dnf) result.dnf = true; else result.timeMs = now - p.startedAt + p.mistakes * PENALTY_MS;
-    if (!dnf) clock.textContent = (result.timeMs / 1000).toFixed(2);
+    if (!dnf){ clock.textContent = (result.timeMs / 1000).toFixed(2); blip('done'); }
     delete state.local.prog[duel.id]; state.local.final[duel.id] = result; saveLocal();
     const token = state.shown = { duelId: duel.id, saving: true, failed: false };
     resend(duel.id).then(() => { token.saving = false; }, () => { token.saving = false; token.failed = true; })
       .then(() => { if (state.screen === 'result' && state.shown === token) render(); });
-    setTimeout(() => { state.screen = 'result'; housekeeping(); render(); }, dnf ? 0 : 800);
+    setTimeout(() => { state.screen = 'result'; housekeeping(); render(); window.scrollTo(0, 0); }, dnf ? 0 : 800);
+  }
+  function leave(){ cleanup(); state.screen = 'lobby'; housekeeping(); render(); }
+  function askLeave(){
+    if (p.over) return;
+    if (p.startedAt == null){ leave(); return; }
+    sheet('Leave the duel?', h('p', { class:'soft', text:'The clock keeps running. You can pick this duel up again from the table until its 10 minutes are up.' }),
+      [{ label:'Keep playing', cls:'primary' }, { label:'Leave', cls:'secondary', onclick: leave }]);
   }
   function go(){
-    overlay.hidden = true;
+    overlay.hidden = true; overlay.replaceChildren();
     if (p.startedAt == null){
       p.startedAt = Date.now(); persist();
       state.backend.saveResult(state.room, start()).catch(() => {});   // tells the scoreboard the clock is running
     }
     window.addEventListener('beforeunload', warn);
-    showPair(); p.locked = false; tick();
+    showPair('deal'); blip('deal');
+    p.locked = false; root.dataset.ready = '1';
+    tick();
   }
   function countdown(){
     let n = 3;
-    const show = () => overlay.replaceChildren(h('div', { class:'count', text: String(n) }));
+    overlay.className = 'overlay center';
+    const show = () => { overlay.replaceChildren(h('div', { class:'count', role:'status', text: String(n) })); blip('tick'); };
     show();
-    const timer = setInterval(() => { n--; if (n > 0) show(); else { clearInterval(timer); go(); } }, 700);
+    p.countdown = setInterval(() => { n--; if (n > 0) show(); else { clearInterval(p.countdown); go(); } }, 700);
   }
+
+  compact.addEventListener('change', placeClock);
+  placeClock(); paintLeft(); paintMisses(); showClock();
+  pileSlot.replaceChildren(cardEl(null, 'pile')); youSlot.replaceChildren(cardEl(null, 'you'));
   const resume = p.startedAt != null;
-  overlay.append(h('div', { class:'panel intro' },
-    h('h2', { text: resume ? `Duel #${no} is already running` : `Duel #${no}` }),
-    resume ? h('p', { text:'You started it earlier and the clock never stopped. Jump back in.' })
-      : h('ul', { class:'plain' },
-          h('li', { text:`${PAIRS} pairs of cards. Each pair shares exactly one symbol.` }),
-          h('li', { text:'Tap that symbol on either card.' }),
-          h('li', { text:`A wrong tap adds ${PENALTY_MS / 1000} seconds.` }),
-          h('li', { text:'Once you start, the clock cannot be paused.' })),
-    h('div', { class:'row end', style:'margin-top:14px' },
-      h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Back'),
-      h('button', { class:'btn primary big', type:'button', onclick: resume ? go : countdown }, resume ? 'Continue' : 'Start'))));
+  overlay.append(h('div', { class:'sheet intro', role:'dialog', 'aria-modal':'true', 'aria-labelledby':'intro-h' },
+    h('h2', { id:'intro-h', text: resume ? `Duel #${no} is already running` : `Duel #${no}` }),
+    resume ? h('p', { class:'soft', text:'You started it earlier and the clock never stopped. Jump back in.' })
+      : h('ol', { class:'steps' },
+          h('li', null, h('span', { class:'n', text:'1' }), h('span', { text:`${PAIRS} pairs of cards. Each pair shares exactly one picture.` })),
+          h('li', null, h('span', { class:'n', text:'2' }), h('span', { text:'Tap it on either card. The pile card then becomes your card.' })),
+          h('li', null, h('span', { class:'n', text:'3' }), h('span', { text:`A wrong tap adds ${PENALTY_MS / 1000} seconds. Once you start, the clock can’t be paused.` }))),
+    h('div', { class:'pair-btns', style:'margin-top:22px' },
+      h('button', { class:'btn secondary slim', type:'button', onclick: leave }, 'Back'),
+      h('button', { class:'btn primary slim', type:'button', onclick: resume ? go : countdown }, resume ? 'Continue' : 'Start'))));
+  const startBtn = overlay.querySelector('.btn.primary');
+  if (startBtn) startBtn.focus();
 }
 
+for (const [id] of SYMBOLS){ const img = new Image(); img.src = symbolSrc(id); }   // so cards appear without a flicker
 boot();
 })();
 </script>

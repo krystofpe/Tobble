@@ -10,11 +10,11 @@ export const shot = name => path.join(OUTPUT, name);
 
 export const btn = (page, name) => page.getByRole('button', { name, exact: true });
 
-// The two cards on screen: symbol ids, their layout, and the one symbol they share.
+// The two cards on screen (the pile, then your card): symbol ids, their layout, and the one symbol they share.
 export function readPair(page){
   return page.evaluate(() => {
-    const cards = [...document.querySelectorAll('.stage .card')].map(card =>
-      [...card.querySelectorAll('.sym')].map(s => ({ id: s.dataset.id, style: s.getAttribute('style') })));
+    const cards = ['.card.pile', '.card.you'].map(sel =>
+      [...document.querySelectorAll(`.stage ${sel} .sym`)].map(s => ({ id: s.dataset.id, style: s.getAttribute('style') })));
     const shared = cards[0].filter(a => cards[1].some(b => b.id === a.id)).map(a => a.id);
     return { cards, shared };
   });
@@ -22,9 +22,10 @@ export function readPair(page){
 
 // Waits until pair k is on screen and ready for a tap.
 export function waitForPair(page, k){
-  return page.waitForFunction(n => document.querySelectorAll('.dots i.on').length === n
-    && document.querySelectorAll('.stage .sym.hit').length === 0
-    && document.querySelectorAll('.stage .card:not(.blank)').length === 2, k);
+  return page.waitForFunction(n => {
+    const play = document.querySelector('.play');
+    return !!play && play.dataset.pair === String(n) && play.dataset.ready === '1';
+  }, k);
 }
 
 // Plays pairs from..stopAfter-1, optionally with one wrong tap on pair wrongAt.
@@ -40,9 +41,9 @@ export async function playDuel(page, { from = 0, stopAfter = 10, wrongAt = -1 } 
     seen.push(pair.cards.map(c => c.map(s => s.id + '@' + s.style).sort().join('|')).sort().join(' || '));
     if (k === wrongAt){
       const wrong = pair.cards[0].find(s => s.id !== pair.shared[0]).id;
-      await page.locator('.stage .card').nth(0).locator(`.sym[data-id="${wrong}"]`).click();
+      await page.locator(`.stage .card.pile .sym[data-id="${wrong}"]`).click();
     }
-    await page.locator('.stage .card').nth(k % 2).locator(`.sym[data-id="${pair.shared[0]}"]`).click();
+    await page.locator(`.stage .card.you .sym[data-id="${pair.shared[0]}"]`).click();
   }
   return seen;
 }

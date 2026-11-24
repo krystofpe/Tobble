@@ -17,13 +17,13 @@ const errors = [], extra = [];
 
 // Taps all pairs but the last, drops the connection, then taps the last one.
 async function finishOffline(ctx, page){
-  await btn(page, 'New duel').click(); await btn(page, 'Start').click();
+  await btn(page, 'Deal a new duel').click(); await btn(page, 'Start').click();
   await page.waitForSelector('.stage .card:not(.blank)');
   await playDuel(page, { stopAfter: 9 });
   await waitForPair(page, 9);
   await ctx.setOffline(true);
   const last = await readPair(page);
-  await page.locator('.stage .card').nth(1).locator(`.sym[data-id="${last.shared[0]}"]`).click();
+  await page.locator(`.stage .card.you .sym[data-id="${last.shared[0]}"]`).click();
   await page.waitForSelector('text=Your result is not saved to the scoreboard yet');
   return page.locator('.result .bigtime').textContent();
 }
@@ -41,19 +41,19 @@ try {
 
   // A creates a game; B joins with the invite link
   await A.page.goto(site.url);
-  await btn(A.page, 'Create a new game').click();
+  await btn(A.page, 'Start a new game').click();
   await A.page.fill('#name', 'Vanda'); await A.page.click('button[type=submit]');
-  await A.page.waitForSelector('text=Challenge your opponent');
+  await A.page.waitForSelector('text=Challenge your friends');
   assert.equal(await A.page.locator('text=Demo mode').count(), 0);
   const link = await A.page.locator('input[aria-label="Invite link"]').inputValue();
   const room = link.split('#')[1];
   assert.match(room, /^[a-z0-9]{20}$/);
   await B.page.goto(link);
   await B.page.fill('#name', 'Petr'); await B.page.click('button[type=submit]');
-  await B.page.waitForSelector('text=Challenge your opponent');
+  await B.page.waitForSelector('text=Challenge your friends');
 
   // A plays; nothing is fetched while the duel is on screen
-  await btn(A.page, 'New duel').click(); await btn(A.page, 'Start').click();
+  await btn(A.page, 'Deal a new duel').click(); await btn(A.page, 'Start').click();
   await A.page.waitForSelector('.stage .card:not(.blank)');
   const playStart = Date.now();
   await B.page.waitForSelector('text=One duel is waiting for you');
@@ -77,8 +77,8 @@ try {
   assert.ok((await B.page.locator('.result').textContent()).includes(timeA));
   await A.page.waitForSelector('.result table', { timeout: 4 * POLL });
   assert.ok((await A.page.locator('.result').textContent()).includes(timeB));
-  await btn(A.page, 'Back to all duels').click(); await btn(B.page, 'Back to all duels').click();
-  await A.page.locator('section:has(h2:text("Scoreboard")) tbody tr').nth(1).waitFor();
+  await btn(A.page, 'Back to the table').click(); await btn(B.page, 'Back to the table').click();
+  await A.page.locator('#board li.player').nth(1).waitFor();
   await A.page.screenshot({ path: shot('supabase-lobby.png'), fullPage: true });
   const rows = (await admin.query('select player_key, time_ms, cardinality(splits) as n, dnf, finished_at is not null as done from public.tobble_results where room = $1', [room])).rows;
   assert.equal(rows.length, 2);
@@ -102,11 +102,11 @@ try {
   // the connection drops before the last tap: the result is sent by itself when it returns
   await finishOffline(A.ctx, A.page);
   await A.page.screenshot({ path: shot('supabase-unsaved.png') });
-  await btn(A.page, 'Back to all duels').click();
+  await btn(A.page, 'Back to the table').click();
   await A.page.waitForSelector('text=Not saved to the scoreboard yet');
   await A.page.waitForSelector('text=Scoreboard problem');
   await A.ctx.setOffline(false);
-  await A.page.waitForSelector('text=Waiting for your opponent to play it.', { timeout: 8000 });
+  await A.page.waitForSelector('text=Waiting for your friends to play it.', { timeout: 8000 });
   await A.page.waitForFunction(() => !document.querySelector('.note.warn'));
   assert.equal(await unsavedCount(A.page), 0, 'local copy dropped once stored');
   await B.page.waitForSelector('text=One duel is waiting for you');
@@ -126,7 +126,7 @@ try {
   console.log('closed tab while offline: delivered after reopening');
 
   // an abandoned duel is closed as "out of time" once its 10 minutes are over
-  await btn(A2, 'New duel').click(); await btn(A2, 'Start').click();
+  await btn(A2, 'Deal a new duel').click(); await btn(A2, 'Start').click();
   await A2.waitForSelector('.stage .card:not(.blank)');
   await playDuel(A2, { stopAfter: 2 });
   await A2.waitForTimeout(500);
@@ -153,7 +153,7 @@ try {
   await A.ctx.setOffline(false);
   await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('tobble:local:'))
     .every(([, v]) => Object.keys(JSON.parse(v).final).length === 0), null, { timeout: 10000 });
-  await btn(A2, 'Back to all duels').click();
+  await btn(A2, 'Back to the table').click();
   await A2.waitForSelector('text=7.78 s');
   console.log('conflict with another device: the stored result is kept');
 
