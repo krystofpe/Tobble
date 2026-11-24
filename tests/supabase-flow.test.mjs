@@ -191,6 +191,32 @@ try {
   assert.equal(api.ctl.calls.filter(c => c.authorization).length, 0, 'publishable key never sent as a bearer token');
   console.log('error notes (paused, not set up, wrong key, incomplete settings) and both key types work');
 
+  // the Welcome screen lists every table this browser has sat at, with who is there and what is waiting
+  const tableRows = B.page.locator('li.table-row');
+  await B.page.getByRole('button', { name: 'Leave the table' }).click();
+  await B.page.waitForSelector('text=Your tables');
+  assert.equal(await tableRows.count(), 1);
+  assert.equal(await B.page.locator('text=Continue my last game').count(), 0, 'the list replaces "Continue my last game"');
+  const firstRow = () => (document.querySelector('li.table-row') || {}).textContent || '';
+  await B.page.waitForFunction(`/Vanda/.test((${firstRow})()) && /\\d+ to play/.test((${firstRow})())`);
+  await btn(B.page, 'Start a new game').click();
+  await B.page.waitForSelector('text=Challenge your friends');
+  await B.page.getByRole('button', { name: 'Leave the table' }).click();
+  await B.page.waitForFunction(() => document.querySelectorAll('li.table-row').length === 2);
+  assert.match(await tableRows.nth(0).textContent(), /Just you so far/, 'newest table first');
+  assert.match(await tableRows.nth(1).textContent(), /Vanda/);
+  await B.page.screenshot({ path: shot('welcome-tables.png'), fullPage: true });
+  await tableRows.nth(1).locator('a').click();
+  await B.page.waitForFunction(r => location.hash === '#' + r, room);
+  await B.page.waitForSelector('text=duels are waiting for you');
+  await B.page.getByRole('button', { name: 'Leave the table' }).click();
+  await B.page.waitForFunction(`/Vanda/.test((${firstRow})())`, null, { timeout: 4000 });
+  await tableRows.nth(1).getByRole('button', { name: 'Forget this table' }).click();
+  await btn(B.page, 'Forget it').click();
+  await B.page.waitForFunction(() => document.querySelectorAll('li.table-row').length === 1);
+  assert.match(await tableRows.nth(0).textContent(), /Vanda/, 'the empty table is gone, the one with Vanda stays');
+  console.log('welcome screen: lists both tables, newest first, with who is there and what is waiting; forgetting one keeps the other');
+
   const used = [...new Set(api.ctl.calls.map(c => c.fn))].sort();
   assert.deepEqual(used, ['tobble_new_duel', 'tobble_room', 'tobble_save_result']);
   assert.deepEqual(errors, [], 'no page errors');

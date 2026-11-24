@@ -190,6 +190,13 @@ td.total{ font-family:var(--font-display); font-weight:600; font-size:17px; }
 
 /* ── welcome ── */
 .hero-art{ max-height:42vh; margin-top:10px; }
+.hero-art.small{ max-height:24vh; }
+.table-row{ padding:0; gap:0; flex-wrap:nowrap; }
+.table-link{ display:flex; align-items:center; gap:12px; flex:1; min-width:0; min-height:68px; padding:10px 4px 10px 14px;
+  color:var(--text); text-decoration:none; border-radius:var(--radius-panel); }
+.table-link:hover{ color:var(--text); }
+.table-link .chip{ flex:none; }
+.table-row .forget{ width:44px; height:44px; margin-right:6px; background:transparent; color:var(--text-muted); }
 .h-card{ fill:var(--card); } .h-edge{ fill:var(--card-edge); } .h-stitch{ fill:none; stroke:var(--card-stitch); stroke-width:2; stroke-dasharray:6 5; }
 .h-ring{ fill:color-mix(in srgb, var(--honey) 24%, transparent); stroke:var(--honey); stroke-width:3; }
 .h-sticker{ fill:var(--honey); } .h-sticker-edge{ fill:var(--honey-edge); }
@@ -637,7 +644,7 @@ const store = {
   get(k){ try { const v = localStorage.getItem(k); if (v != null) return v; } catch {} return mem.has(k) ? mem.get(k) : null; },
   set(k, v){ mem.set(k, v); try { localStorage.setItem(k, v); } catch {} },
 };
-const K = { name:'tobble:name', token:'tobble:token', sound:'tobble:sound', room:'tobble:room', demo:'tobble:demo',
+const K = { name:'tobble:name', token:'tobble:token', sound:'tobble:sound', room:'tobble:room', tables:'tobble:tables', demo:'tobble:demo',
             local:(room, key) => `tobble:local:${room}:${key}` };
 
 /* ─────────────────────────── 4. STORAGE BACKENDS ───────────────────────────
@@ -725,6 +732,11 @@ function supabaseBackend(url, key){
         stop(){ stopped = true; clearTimeout(timer); document.removeEventListener('visibilitychange', wake); window.removeEventListener('online', wake); },
         now: tick,
       };
+    },
+    // One look at a table, without polling (the Welcome screen's list of tables).
+    async load(room){
+      const data = await call('tobble_room', { p_room: room });
+      return { duels: Array.isArray(data && data.duels) ? data.duels : [], results: Array.isArray(data && data.results) ? data.results : [] };
     },
     createDuel(room, duel){
       return call('tobble_new_duel', { p_room: room, p_id: duel.id, p_seed: duel.seed, p_created_by: duel.createdBy });
@@ -834,6 +846,65 @@ function otherPlayerList(){
 }
 const otherPlayers = () => otherPlayerList().map(p => p.name);
 
+// The tables this browser has sat at, newest first, for the Welcome screen. Kept in this browser only:
+// [{ id, seen, duels, yourTurn, players: [{ name, token }] }], where yourTurn counts duels this player hasn't finished.
+const MAX_TABLES = 12;
+function cleanTable(t){
+  return { id: String(t.id), seen: Number(t.seen) || 0,
+           duels: Math.max(0, Math.trunc(Number(t.duels) || 0)), yourTurn: Math.max(0, Math.trunc(Number(t.yourTurn) || 0)),
+           players: (Array.isArray(t.players) ? t.players : []).slice(0, 10)
+             .map(x => ({ name: String((x && x.name) || 'Player').slice(0, 40), token: validToken(x && x.token) })) };
+}
+function readTables(){
+  try {
+    const v = JSON.parse(store.get(K.tables));
+    if (Array.isArray(v)) return v.filter(t => t && /^[a-z0-9]{16,40}$/.test(t.id)).map(cleanTable).sort((a, b) => b.seen - a.seen);
+  } catch {}
+  return [];
+}
+// info: a tableInfo() result to store; visit: this table was just opened (moves it to the top).
+function rememberTable(id, info, visit){
+  const list = readTables(), before = JSON.stringify(list), i = list.findIndex(t => t.id === id);
+  const entry = cleanTable({ ...(i >= 0 ? list[i] : { id }), ...(info || {}), ...(visit ? { seen: Date.now() } : {}) });
+  if (i >= 0) list.splice(i, 1);
+  list.push(entry);
+  list.sort((a, b) => b.seen - a.seen);
+  const after = JSON.stringify(list.slice(0, MAX_TABLES));
+  if (after !== before) store.set(K.tables, after);
+}
+function forgetTable(id){ store.set(K.tables, JSON.stringify(readTables().filter(t => t.id !== id))); }
+// A table seen from one player's seat: how many duels, how many they still have to finish, who else sits there.
+function tableInfo(room, duels, results, me){
+  const finished = new Set(results.filter(r => r.key === me.key && r.finishedAt != null).map(r => r.duelId));
+  try { const v = JSON.parse(store.get(K.local(room, me.key))); if (v && v.final) Object.keys(v.final).forEach(id => finished.add(id)); } catch {}
+  const people = new Map();
+  for (const d of duels){
+    const key = d.createdBy ? slug(d.createdBy) : '';
+    if (key && key !== me.key && !people.has(key)) people.set(key, { name: d.createdBy, token: null, at: d.createdAt });
+  }
+  for (const r of results){
+    if (r.key === me.key) continue;
+    const at = r.finishedAt || r.startedAt, old = people.get(r.key);
+    if (!old || at >= old.at) people.set(r.key, { name: r.name, token: r.token || (old && old.token) || null, at });
+    else if (!old.token && r.token) old.token = r.token;
+  }
+  return { duels: duels.length, yourTurn: duels.filter(d => !finished.has(d.id)).length,
+           players: [...people].sort((a, b) => b[1].at - a[1].at).map(([key, x]) => ({ name: x.name, token: x.token || defaultToken(key) })) };
+}
+// Fresh counts for the tables on the Welcome screen: one look at each of the newest few, at most every 15 seconds.
+let tablesCheckedAt = 0;
+function refreshTables(force){
+  if (!state.backend || state.backend.mode !== 'cloud' || !state.player) return;
+  if (!force && Date.now() - tablesCheckedAt < 15000) return;
+  tablesCheckedAt = Date.now();
+  const me = state.player, before = JSON.stringify(readTables());
+  Promise.all(readTables().slice(0, 8).map(t => state.backend.load(t.id).then(({ duels, results }) => {
+    rememberTable(t.id, tableInfo(t.id, duels.map(cleanDuel), results.map(cleanResult), me));
+  }, () => {}))).then(() => {
+    if (state.screen === 'landing' && state.player === me && JSON.stringify(readTables()) !== before) render();
+  });
+}
+
 /* ─────────────────────────── 6. START-UP ─────────────────────────── */
 function boot(){
   const url = String(SUPABASE_URL || '').trim(), key = String(SUPABASE_KEY || '').trim();
@@ -847,6 +918,8 @@ function boot(){
   } else state.backend = localBackend();
   const name = store.get(K.name);
   if (name) state.player = { name, key: slug(name), token: validToken(store.get(K.token)) };
+  const last = store.get(K.room);   // the one table remembered before the list of tables existed
+  if (last && /^[a-z0-9]{16,40}$/.test(last) && !readTables().length) rememberTable(last);
   window.addEventListener('hashchange', enterRoom);
   enterRoom();
 }
@@ -859,8 +932,8 @@ function enterRoom(){
     const id = location.hash.replace(/^#/, '');
     state.room = /^[a-z0-9]{16,40}$/.test(id) ? id : null;
   }
-  if (!state.room){ state.screen = 'landing'; render(); return; }
-  if (!isDemo()) store.set(K.room, state.room);
+  if (!state.room){ state.screen = 'landing'; render(); refreshTables(); return; }
+  if (!isDemo()) rememberTable(state.room, null, true);
   syncLocal();
   state.screen = state.player ? 'lobby' : 'name';
   const room = state.room;
@@ -873,6 +946,7 @@ function enterRoom(){
       const changed = sig !== state.sig || !state.loaded || state.slow || !!state.error;
       Object.assign(state, { duels: d, results: r, sig, loaded: true, slow: false, error: null });
       housekeeping();
+      if (!isDemo() && state.player) rememberTable(room, tableInfo(room, d, r, state.player));
       if (changed) refresh();             // redraw only when something changed
     },
     onError(err){
@@ -892,6 +966,7 @@ function setPlayer(name, token){
   syncLocal();
   state.screen = state.room ? 'lobby' : 'landing';
   housekeeping(); render();
+  if (!state.room) refreshTables(true);
 }
 // Finish what an earlier visit left behind: re-send unsaved results, close duels that ran out of time.
 function housekeeping(){
@@ -1124,32 +1199,52 @@ const meChip = () => h('button', { class:'me-chip', type:'button', 'aria-label':
   onclick: () => { state.screen = 'name'; render(); } }, tokenEl(myToken()), h('span', { class:'ell', text: state.player ? state.player.name : 'Guest' }));
 
 /* Welcome */
-function heroArt(){
+function heroArt(small){
   const img = (id, x, y, s, rot) => `<image href="${symbolSrc(id)}" x="${x}" y="${y}" width="${s}" height="${s}" transform="rotate(${rot} ${x + s / 2} ${y + s / 2})"/>`;
   const card = (cx, cy, rot, inner) => `<g transform="rotate(${rot} ${cx} ${cy})"><circle class="h-edge" cx="${cx}" cy="${cy + 6}" r="110" filter="url(#hero-shadow)"/>` +
     `<circle class="h-card" cx="${cx}" cy="${cy}" r="110"/><circle class="h-stitch" cx="${cx}" cy="${cy}" r="100"/>${inner}</g>`;
   const ring = (cx, cy) => `<circle class="h-ring" cx="${cx}" cy="${cy}" r="31.5"/>`;
-  return art(`<svg class="hero-art bleed" viewBox="-24 -6 390 350" aria-hidden="true" focusable="false">
+  return art(`<svg class="hero-art bleed${small ? ' small' : ''}" viewBox="-24 -6 390 350" aria-hidden="true" focusable="false">
     <defs><filter id="hero-shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#08140F" flood-opacity=".45"/></filter></defs>
     ${card(96, 220, -8, img('cookie', 67, 191, 58, 14) + img('moon', 72, 134, 48, -20) + img('mitten', 130, 176, 50, 18) + img('leaf', 107, 245, 50, -30) + img('candle', 36, 246, 48, 8) + ring(37, 201) + img('mushroom', 10, 174, 54, -12))}
     ${card(246, 110, 7, img('star', 218, 82, 56, -10) + img('mug', 221, 23, 50, 12) + img('fish', 257, 135, 50, -24) + img('apple', 186, 136, 48, 16) + img('house', 163, 67, 48, -6) + ring(305, 91) + img('mushroom', 278, 64, 54, 22))}
     <g transform="rotate(-6 288 254)"><rect class="h-sticker-edge" x="238" y="241" width="100" height="31" rx="12"/><rect class="h-sticker" x="238" y="238" width="100" height="31" rx="12"/><text class="h-text" x="288" y="259" text-anchor="middle">Same one!</text></g>
   </svg>`);
 }
+function tablesSection(tables){
+  return h('section', { class:'section' }, h('h2', { class:'label', text:'Your tables' }),
+    h('ul', { class:'rows' }, tables.map(t => {
+      const names = t.players.map(x => x.name);
+      const who = !names.length ? 'Just you so far'
+        : names.length <= 3 ? listNames(names) : `${names.slice(0, 2).join(', ')} and ${names.length - 2} more`;
+      const sub = [t.duels === 1 ? '1 duel' : `${t.duels} duels`, t.seen ? 'opened ' + fmtWhen(t.seen) : ''].filter(Boolean).join(' · ');
+      const forget = () => sheet('Forget this table?',
+        h('p', { class:'soft', text:'It only leaves this list. The table, its duels and its scoreboard stay online, and its invite link brings it back.' }),
+        [{ label:'Forget it', cls:'primary', onclick: () => { forgetTable(t.id); render(); } }, { label:'Keep it', cls:'secondary' }]);
+      return h('li', { class:'table-row prow' },
+        h('a', { class:'table-link', href:'#' + t.id },
+          t.players.length ? h('span', { class:'tokens-stack' }, t.players.slice(0, 3).map(x => tokenEl(x.token, true)))
+            : h('span', { class:'wait-disc', 'aria-hidden':'true' }, h('i'), h('i'), h('i')),
+          h('span', { class:'grow' }, h('span', { class:'title' }, h('span', { class:'ell', text: who })), h('span', { class:'sub ell', text: sub })),
+          t.yourTurn ? h('span', { class:'chip you', text:`${t.yourTurn} to play` }) : null),
+        h('button', { class:'icon-btn forget', type:'button', 'aria-label':'Forget this table', onclick: forget }, icon('x', 18, 2.4)));
+    })));
+}
 function landingView(){
-  const last = store.get(K.room);
-  return h('div', { class:'col' },
+  const tables = readTables(), has = tables.length > 0;
+  const start = h('button', { class:'btn primary', type:'button', onclick: () => { location.hash = randomId(20); } }, icon('plus'), 'Start a new game');
+  const notes = [
+    h('p', { class:'small muted', style:'text-align:center;margin-top:6px', text:'Any number of friends · play whenever you like · about a minute a duel' }),
+    h('p', { class:'small muted', style:'text-align:center' }, 'Invited? Open the link your friend sent you. ',
+      h('button', { class:'link', type:'button', onclick: howToPlay }, 'How to play'))];
+  return h('div', { class:'col' + (has ? ' table-col' : '') },
     h('div', { class:'bar', style:'justify-content:space-between' }, meChip(), soundButton()),
-    heroArt(),
+    heroArt(has),
     h('div', { style:'display:flex;flex-direction:column;gap:10px;margin-top:18px' },
       h('h1', { class:'wordmark', text:'Tobble' }),
       h('p', { class:'tagline', text:'A cozy matching game for friends. Find the one picture two cards share, faster than anyone else at the table.' })),
-    h('div', { class:'btn-row', style:'margin-top:auto;padding-top:28px' },
-      h('button', { class:'btn primary', type:'button', onclick: () => { location.hash = randomId(20); } }, icon('plus'), 'Start a new game'),
-      last && h('button', { class:'btn secondary', type:'button', onclick: () => { location.hash = last; } }, icon('enter'), 'Continue my last game'),
-      h('p', { class:'small muted', style:'text-align:center;margin-top:6px', text:'Any number of friends · play whenever you like · about a minute a duel' }),
-      h('p', { class:'small muted', style:'text-align:center' }, 'Invited? Open the link your friend sent you. ',
-        h('button', { class:'link', type:'button', onclick: howToPlay }, 'How to play'))));
+    has ? [tablesSection(tables), h('div', { style:'margin-top:18px' }, notes), h('div', { class:'dock' }, start)]
+        : h('div', { class:'btn-row', style:'margin-top:auto;padding-top:28px' }, start, notes));
 }
 
 /* Who's playing */

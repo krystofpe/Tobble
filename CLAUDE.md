@@ -54,6 +54,10 @@ tests/helpers/               serve (static server + settings injection), postgre
 - **Hidden times:** others' times for a duel are hidden until you've played it (UI only, not enforced against someone
   reading network traffic; fine for friends).
 - **Scoreboard:** counts duels at least two players finished: won, lost, tied, average, best.
+- **Tables:** one invite link = one table (game) with its own duels and scoreboard. The Welcome screen lists the tables
+  this browser has sat at (`tobble:tables` in localStorage, newest first, max 12): other players' names and tokens,
+  duel count and "N to play". Counts are saved from every poll at a table and re-fetched (one `tobble_room` call per
+  table, newest 8, at most every 15 s) when the Welcome screen opens. "Forget" removes a table from this list only.
 - **Identity:** no accounts. A player is their name normalised by `slug()`, plus a token (robin, mushroom, acorn, moon,
   mitten, fish) stored on their results. A game is a 20-character random id in the URL hash (the invite link).
 - **Name and art:** "Tobble" with the Snug Spot pictures. Don't use another game's name, logo or card art.

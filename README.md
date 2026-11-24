@@ -22,6 +22,10 @@ A shared scoreboard keeps count of who won what.
 3. **Deal a new duel** and play it. Your friends find it under "Your turn" next time they open the
    link; your time stays hidden from them until they've played it.
 
+One link is one table: deal as many duels at it as you like, no new invite needed. If you play at
+several tables (say, one per group of friends), the Welcome screen lists them under **Your tables**,
+newest first, with who sits there and how many duels are waiting for you.
+
 ## Setting it up
 
 ### 1. The scoreboard (Supabase, free, about 10 minutes)
