@@ -53,9 +53,11 @@ npm install
 npx playwright install chromium   # once, for the browser tests
 npm test                          # cards, SQL on real Postgres, demo mode, two-browser Supabase flow (~2 min)
 npm run serve                     # play locally at http://127.0.0.1:8080 (demo mode)
+npm run serve:live                # the same, against the real scoreboard in index.html
 ```
 
 Postgres for the tests comes from npm (`embedded-postgres`); nothing needs to be installed.
+The tests always run in demo mode or against their own throwaway database, never the real scoreboard.
 Browser tests save screenshots to `tests/output/`.
 
 ## Credits

@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "serve": "node tests/helpers/serve.mjs",
+    "serve:live": "LIVE=1 node tests/helpers/serve.mjs",
     "test": "node tests/run-all.mjs",
     "test:cards": "node tests/cards.test.mjs",
     "test:demo": "node tests/demo.test.mjs",

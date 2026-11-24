@@ -9,10 +9,13 @@ History: the code started as the tested *Symbol Duel* prototype (gameplay, Supab
 *Snug Spot* design (look, symbols, layouts, motion). Design doc: `docs/superpowers/specs/2026-11-24-tobble-design.md`.
 
 ## Status
-- Playable in **demo mode** (scores in the browser only) while the Supabase settings in `index.html` are empty.
-- The Supabase path is tested against real Postgres 17 behind a stand-in for Supabase's REST layer
-  (`tests/helpers/rest-shim.mjs`); check it against the real project after any SQL change.
-- Deployed by `.github/workflows/pages.yml` to GitHub Pages (tests first, then publish `index.html` + `assets/`).
+- Live at https://krystofpe.github.io/Tobble/, published by `.github/workflows/pages.yml` (tests first, then
+  `index.html` + `assets/` to GitHub Pages).
+- `index.html` carries the live Supabase settings (project `niqpwqsequxjjmzgijko`, publishable key — public by design).
+  `setup.sql` has been run there (checked 2026-11-24: the three functions answer, direct table reads are refused).
+  After any SQL change, run the new `setup.sql` in that project's SQL Editor too.
+- Tests never touch the live scoreboard: `tests/helpers/serve.mjs` empties both settings (demo mode) unless a test
+  fills in its own; the Supabase path is tested against real Postgres 17 behind `tests/helpers/rest-shim.mjs`.
 
 ## Commands
 ```bash
@@ -20,7 +23,8 @@ npm install
 npx playwright install chromium   # once
 npm test                          # cards, SQL, demo mode, two-device Supabase flow (about 2 minutes)
 npm run test:cards | test:sql | test:demo | test:flow
-npm run serve                     # http://127.0.0.1:8080 (PORT=... to change)
+npm run serve                     # http://127.0.0.1:8080 in demo mode (PORT=... to change)
+npm run serve:live                # the same against the real scoreboard (writes real duels!)
 ```
 Browser tests write screenshots to `tests/output/` (gitignored); look at them after changing the UI.
 
@@ -65,7 +69,7 @@ tests/helpers/               serve (static server + settings injection), postgre
 
 ## How index.html is organised
 Script sections: 1 settings, 2 cards, 3 helpers, 4 storage backends, 5 app state, 6 start-up, 7 screens, 8 playing a duel.
-- **Settings:** `SUPABASE_URL`, `SUPABASE_KEY`, `POLL_MS`, `PAIRS`, `PENALTY_MS`, `TIME_LIMIT_MS`, `PER_CARD`, `TOKENS`,
+- **Settings:** `SUPABASE_URL`, `SUPABASE_KEY` (exactly one unindented line each; serve.mjs relies on it), `POLL_MS`, `PAIRS`, `PENALTY_MS`, `TIME_LIMIT_MS`, `PER_CARD`, `TOKENS`,
   `SYMBOLS` (must equal `assets/symbols/symbols.json`), `LAYOUTS`. Both Supabase settings empty → demo mode; half-filled
   or a URL not starting with `https://` (or `http://localhost` / `127.0.0.1`) → a settings-problem screen.
 - **Backends** share one interface: `subscribe(room, { onData, onError, isActive })` → `{ stop, now }`, plus

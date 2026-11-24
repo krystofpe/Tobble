@@ -9,12 +9,25 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const ASSETS = path.join(ROOT, 'assets');
 const TYPES = { '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.json': 'application/json', '.png': 'image/png', '.txt': 'text/plain; charset=utf-8' };
 
+// index.html carries the live site's Supabase settings. Tests never use them: the page is served with both
+// settings emptied (demo mode), and a test that needs a scoreboard fills in its own with withSettings().
+export function demoSettings(html){
+  for (const name of ['SUPABASE_URL', 'SUPABASE_KEY']){
+    const line = new RegExp(`^const ${name} = '[^']*';`, 'gm');
+    if ((html.match(line) || []).length !== 1) throw new Error(`index.html must have exactly one "const ${name} = '…';" line; update tests/helpers/serve.mjs`);
+    html = html.replace(line, `const ${name} = '';`);
+  }
+  return html;
+}
+
 // transform(html) lets a test serve a modified copy of the page, for example with Supabase settings filled in.
-export function serve({ transform, port = 0 } = {}){
+// live: true serves index.html with its own settings (npm run serve:live).
+export function serve({ transform, port = 0, live = false } = {}){
   const server = http.createServer(async (req, res) => {
     const { pathname } = new URL(req.url, 'http://x');
     if (pathname === '/' || pathname === '/index.html'){
       let html = await readFile(path.join(ROOT, 'index.html'), 'utf8');
+      if (!live) html = demoSettings(html);
       if (transform) html = transform(html);
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
       res.end(html);
@@ -54,6 +67,7 @@ export function withSettings({ url = '', key = '', pollMs = 10000 } = {}){
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href){
-  const { url } = await serve({ port: Number(process.env.PORT) || 8080 });
-  console.log(`Tobble is running at ${url} (demo mode unless the Supabase settings are filled in). Ctrl+C stops it.`);
+  const live = process.env.LIVE === '1';
+  const { url } = await serve({ port: Number(process.env.PORT) || 8080, live });
+  console.log(`Tobble is running at ${url} ${live ? 'with the real scoreboard from index.html' : 'in demo mode (LIVE=1 for the real scoreboard)'}. Ctrl+C stops it.`);
 }
