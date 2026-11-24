@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snug Spot — Welcome</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&amp;family=Nunito:wght@400..800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F2B54A}a:hover{color:#F7C96F}
+.felt{background-color:#1F3B31;background-image:radial-gradient(rgba(255,240,215,0.045) 1px, transparent 1.4px);background-size:7px 7px}
+.press{transition:transform 120ms ease, box-shadow 120ms ease}
+.press:active{transform:translateY(3px)}
+a:focus-visible,button:focus-visible{outline:3px solid #F2B54A;outline-offset:3px}
+</style>
+</helmet>
+<div class="felt" style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 24px 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; font-family: Nunito, system-ui, sans-serif; color: #FBF1DE">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; height: 48px">
+    <button type="button" class="press" aria-label="Change your token" style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 16px 0 4px; border-radius: 24px; border: 0; background: #2A4A3E; color: #FBF1DE; font-family: Nunito, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
+      <span style="width: 40px; height: 40px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center">
+        <img src="../../assets/symbols/mug.svg" alt="" style="width: 28px; height: 28px">
+      </span>
+      Guest
+    </button>
+    <button type="button" class="press" aria-label="{{soundLabel}}" onClick="{{toggleSound}}" style="width: 48px; height: 48px; border-radius: 50%; border: 0; background: #2A4A3E; color: #FBF1DE; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <sc-if value="{{soundOn}}" hint-placeholder-val="{{ true }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"></path></svg>
+      </sc-if>
+      <sc-if value="{{soundOff}}" hint-placeholder-val="{{ false }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"></path><path d="M16 9l5 6M21 9l-5 6"></path></svg>
+      </sc-if>
+    </button>
+  </div>
+
+  <div aria-hidden="true" style="position: relative; height: 336px; margin-top: 12px">
+    <div style="position: absolute; left: -14px; top: 110px; width: 220px; height: 220px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 6px 0 #D8C29C, 0 18px 30px rgba(8, 20, 15, 0.45); transform: rotate(-8deg)">
+      <div style="position: absolute; inset: 9px; border: 2px dashed #E8D6B4; border-radius: 50%"></div>
+      <img src="../../assets/symbols/cookie.svg" alt="" style="position: absolute; left: 81px; top: 81px; width: 58px; height: 58px; transform: rotate(14deg)">
+      <img src="../../assets/symbols/moon.svg" alt="" style="position: absolute; left: 86px; top: 24px; width: 48px; height: 48px; transform: rotate(-20deg)">
+      <img src="../../assets/symbols/mitten.svg" alt="" style="position: absolute; left: 144px; top: 66px; width: 50px; height: 50px; transform: rotate(18deg)">
+      <img src="../../assets/symbols/leaf.svg" alt="" style="position: absolute; left: 121px; top: 135px; width: 50px; height: 50px; transform: rotate(-30deg)">
+      <img src="../../assets/symbols/candle.svg" alt="" style="position: absolute; left: 50px; top: 136px; width: 48px; height: 48px; transform: rotate(8deg)">
+      <div style="position: absolute; left: 21px; top: 61px; width: 60px; height: 60px; border-radius: 50%; background: rgba(242, 181, 74, 0.24); box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center">
+        <img src="../../assets/symbols/mushroom.svg" alt="" style="width: 54px; height: 54px; transform: rotate(-12deg)">
+      </div>
+    </div>
+    <div style="position: absolute; left: 136px; top: 0px; width: 220px; height: 220px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 6px 0 #D8C29C, 0 18px 30px rgba(8, 20, 15, 0.45); transform: rotate(7deg)">
+      <div style="position: absolute; inset: 9px; border: 2px dashed #E8D6B4; border-radius: 50%"></div>
+      <img src="../../assets/symbols/star.svg" alt="" style="position: absolute; left: 82px; top: 82px; width: 56px; height: 56px; transform: rotate(-10deg)">
+      <img src="../../assets/symbols/mug.svg" alt="" style="position: absolute; left: 85px; top: 23px; width: 50px; height: 50px; transform: rotate(12deg)">
+      <img src="../../assets/symbols/fish.svg" alt="" style="position: absolute; left: 121px; top: 135px; width: 50px; height: 50px; transform: rotate(-24deg)">
+      <img src="../../assets/symbols/apple.svg" alt="" style="position: absolute; left: 50px; top: 136px; width: 48px; height: 48px; transform: rotate(16deg)">
+      <img src="../../assets/symbols/house.svg" alt="" style="position: absolute; left: 27px; top: 67px; width: 48px; height: 48px; transform: rotate(-6deg)">
+      <div style="position: absolute; left: 139px; top: 61px; width: 60px; height: 60px; border-radius: 50%; background: rgba(242, 181, 74, 0.24); box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center">
+        <img src="../../assets/symbols/mushroom.svg" alt="" style="width: 54px; height: 54px; transform: rotate(22deg)">
+      </div>
+    </div>
+    <div style="position: absolute; left: 238px; top: 238px; padding: 6px 12px; border-radius: 12px; background: #F2B54A; color: #2A1D14; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 16px; transform: rotate(-6deg); box-shadow: 0 3px 0 #B9822A">Same one!</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 18px">
+    <h1 style="margin: 0; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 52px; line-height: 1; letter-spacing: -0.5px; color: #FBF1DE">Snug Spot</h1>
+    <p style="margin: 0; font-size: 17px; line-height: 1.5; color: #C9D8CD">A cozy matching game for two. Find the one picture your card shares with the pile — before your friend does.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto">
+    <a href="Lobby.dc.html" class="press" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 58px; border-radius: 18px; background: #F2B54A; color: #2A1D14; text-decoration: none; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 20px; box-shadow: 0 4px 0 #B9822A">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      Create a room
+    </a>
+    <a href="Join.dc.html" class="press" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 58px; border-radius: 18px; background: transparent; border: 2px solid #5E8172; box-sizing: border-box; color: #FBF1DE; text-decoration: none; font-family: Fredoka, sans-serif; font-weight: 500; font-size: 20px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="M10 17l5-5-5-5M15 12H3"></path></svg>
+      Join with a code
+    </a>
+    <p style="margin: 6px 0 0; text-align: center; font-size: 14px; color: #B9CCBF">2 players · 2 phones · about 3 minutes a game</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { soundOn: true };
+  }
+  renderVals() {
+    const on = this.state.soundOn;
+    return {
+      soundOn: on,
+      soundOff: !on,
+      soundLabel: on ? 'Sound is on' : 'Sound is off',
+      toggleSound: () => this.setState({ soundOn: !on })
+    };
+  }
+}
+</script>
+</body>
+</html>

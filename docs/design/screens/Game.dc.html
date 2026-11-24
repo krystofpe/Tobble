@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snug Spot — Game</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&amp;family=Nunito:wght@400..800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F2B54A}a:hover{color:#F7C96F}
+.felt{background-color:#1F3B31;background-image:radial-gradient(rgba(255,240,215,0.045) 1px, transparent 1.4px);background-size:7px 7px}
+a:focus-visible,button:focus-visible{outline:3px solid #F2B54A;outline-offset:3px}
+.sym{transition:transform 180ms cubic-bezier(.2,.8,.2,1.3), box-shadow 160ms ease, background 160ms ease}
+@keyframes dealA{from{transform:translateY(-36px) rotate(-14deg) scale(.88);opacity:0}to{transform:none;opacity:1}}
+@keyframes dealB{from{transform:translateY(-36px) rotate(-14deg) scale(.88);opacity:0}to{transform:none;opacity:1}}
+@keyframes slideA{from{transform:translateY(-324px)}to{transform:none}}
+@keyframes slideB{from{transform:translateY(-324px)}to{transform:none}}
+@keyframes shakeA{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes shakeB{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes popA{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+@keyframes popB{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.dealA{animation:dealA 420ms cubic-bezier(.2,.8,.2,1.15)}
+.dealB{animation:dealB 420ms cubic-bezier(.2,.8,.2,1.15)}
+.slideA{animation:slideA 520ms cubic-bezier(.25,.8,.25,1)}
+.slideB{animation:slideB 520ms cubic-bezier(.25,.8,.25,1)}
+.shakeA{animation:shakeA 380ms ease}
+.shakeB{animation:shakeB 380ms ease}
+.popA{animation:popA 260ms cubic-bezier(.2,.8,.2,1.3)}
+.popB{animation:popB 260ms cubic-bezier(.2,.8,.2,1.3)}
+</style>
+</helmet>
+<div class="felt" style="width: 390px; height: 844px; box-sizing: border-box; padding: 16px 20px 22px; display: flex; flex-direction: column; align-items: stretch; position: relative; overflow: hidden; font-family: Nunito, system-ui, sans-serif; color: #FBF1DE">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; height: 48px; flex-shrink: 0">
+    <a href="Main.dc.html" aria-label="Leave game" style="width: 48px; height: 48px; border-radius: 50%; background: #2A4A3E; color: #FBF1DE; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </a>
+    <span style="font-family: Fredoka, sans-serif; font-weight: 500; font-size: 16px; color: #C9D8CD">Room MOSS</span>
+    <span aria-label="{{leftLabel}}" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 20px; background: #2A4A3E; font-weight: 800; font-size: 15px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="8"></circle><path d="M5.6 15.5A8 8 0 0 1 15.5 5.6"></path></svg>
+      {{left}} left
+    </span>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; height: 56px; box-sizing: border-box; padding: 0 12px 0 8px; margin-top: 12px; border-radius: 18px; background: #2A4A3E; flex-shrink: 0">
+    <span style="width: 40px; height: 40px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F09A84; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <img src="../../assets/symbols/robin.svg" alt="" style="width: 28px; height: 28px">
+    </span>
+    <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0">
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 17px">Ema</span>
+      <span style="font-size: 13px; color: #B9CCBF">{{oppStatus}}</span>
+    </span>
+    <span aria-label="{{oppScoreLabel}}" style="display: flex; align-items: baseline; gap: 5px; height: 38px; padding: 0 14px; box-sizing: border-box; border-radius: 19px; background: rgba(240, 154, 132, 0.16); color: #F09A84; line-height: 38px">
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 22px">{{oppScore}}</span>
+      <span style="font-weight: 800; font-size: 12px">cards</span>
+    </span>
+  </div>
+
+  <span style="margin-top: 12px; text-align: center; font-weight: 800; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: #B9CCBF; flex-shrink: 0">The pile</span>
+
+  <div class="{{pileShake}}" style="align-self: center; margin-top: 8px; flex-shrink: 0; opacity: {{cardOpacity}}; transition: opacity 200ms ease">
+    <div role="group" aria-label="The pile card" class="{{pileDeal}}" style="position: relative; width: 260px; height: 260px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 6px 0 #D8C29C, 0 16px 28px rgba(8, 20, 15, 0.45)">
+      <div style="position: absolute; inset: 9px; border: 2px dashed #E8D6B4; border-radius: 50%; pointer-events: none"></div>
+      <sc-for list="{{pileSlots}}" as="s" hint-placeholder-count="8">
+        <button type="button" class="sym" aria-label="{{s.label}}" onClick="{{s.pick}}" style="position: absolute; left: {{s.left}}px; top: {{s.top}}px; width: {{s.size}}px; height: {{s.size}}px; padding: 0; border: 0; border-radius: 50%; background: {{s.bg}}; box-shadow: {{s.ring}}; transform: scale({{s.scale}}); cursor: pointer">
+          <img src="{{s.src}}" alt="" style="display: block; width: 100%; height: 100%; transform: rotate({{s.rot}}deg); pointer-events: none">
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div role="status" aria-live="polite" style="height: 44px; margin-top: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+    <span class="{{toastAnim}}" style="display: flex; align-items: center; height: 38px; padding: 0 16px; box-sizing: border-box; border-radius: 19px; background: {{toastBg}}; border: 2px solid {{toastBorder}}; color: {{toastFg}}; font-weight: 800; font-size: 15px; white-space: nowrap">{{toast}}</span>
+  </div>
+
+  <div class="{{youShake}}" style="align-self: center; margin-top: 8px; flex-shrink: 0; opacity: {{cardOpacity}}; transition: opacity 200ms ease">
+    <div role="group" aria-label="Your card" class="{{youDeal}}" style="position: relative; width: 260px; height: 260px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 6px 0 #D8C29C, 0 16px 28px rgba(8, 20, 15, 0.45)">
+      <div style="position: absolute; inset: 9px; border: 2px dashed #E8D6B4; border-radius: 50%; pointer-events: none"></div>
+      <sc-for list="{{youSlots}}" as="s" hint-placeholder-count="8">
+        <button type="button" class="sym" aria-label="{{s.label}}" onClick="{{s.pick}}" style="position: absolute; left: {{s.left}}px; top: {{s.top}}px; width: {{s.size}}px; height: {{s.size}}px; padding: 0; border: 0; border-radius: 50%; background: {{s.bg}}; box-shadow: {{s.ring}}; transform: scale({{s.scale}}); cursor: pointer">
+          <img src="{{s.src}}" alt="" style="display: block; width: 100%; height: 100%; transform: rotate({{s.rot}}deg); pointer-events: none">
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 12px; height: 56px; box-sizing: border-box; padding: 0 12px 0 8px; margin-top: auto; border-radius: 18px; background: #2A4A3E; flex-shrink: 0">
+    <span style="width: 40px; height: 40px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <img src="../../assets/symbols/mug.svg" alt="" style="width: 28px; height: 28px">
+    </span>
+    <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0">
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 17px">You</span>
+      <span style="font-size: 13px; color: #B9CCBF">{{youSub}}</span>
+    </span>
+    <span aria-label="{{youScoreLabel}}" style="display: flex; align-items: baseline; gap: 5px; height: 38px; padding: 0 14px; box-sizing: border-box; border-radius: 19px; background: rgba(242, 181, 74, 0.16); color: #F2B54A; line-height: 38px">
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 22px">{{youScore}}</span>
+      <span style="font-weight: 800; font-size: 12px">cards</span>
+    </span>
+  </div>
+
+  <sc-if value="{{finished}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; z-index: 30">
+      <dc-import name="Results" you-score="{{youScore}}" opp-score="{{oppScore}}" best-time="{{bestText}}" best-streak="{{bestStreak}}" opp-name="Ema" on-rematch="{{rematch}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pileSize":{"editor":"int","min":4,"max":40,"default":12,"section":"Game"},"$preview":{"width":390,"height":844}}'>
+const SYMBOLS = {
+  acorn: ['Acorn', '../../assets/symbols/acorn.svg'],
+  apple: ['Apple', '../../assets/symbols/apple.svg'],
+  book: ['Book', '../../assets/symbols/book.svg'],
+  candle: ['Candle', '../../assets/symbols/candle.svg'],
+  cloud: ['Cloud', '../../assets/symbols/cloud.svg'],
+  cookie: ['Cookie', '../../assets/symbols/cookie.svg'],
+  daisy: ['Daisy', '../../assets/symbols/daisy.svg'],
+  fish: ['Fish', '../../assets/symbols/fish.svg'],
+  heart: ['Heart', '../../assets/symbols/heart.svg'],
+  house: ['House', '../../assets/symbols/house.svg'],
+  key: ['Key', '../../assets/symbols/key.svg'],
+  leaf: ['Leaf', '../../assets/symbols/leaf.svg'],
+  mitten: ['Mitten', '../../assets/symbols/mitten.svg'],
+  moon: ['Moon', '../../assets/symbols/moon.svg'],
+  mug: ['Mug', '../../assets/symbols/mug.svg'],
+  mushroom: ['Mushroom', '../../assets/symbols/mushroom.svg'],
+  pine: ['Pine tree', '../../assets/symbols/pine.svg'],
+  robin: ['Robin', '../../assets/symbols/robin.svg'],
+  snowflake: ['Snowflake', '../../assets/symbols/snowflake.svg'],
+  star: ['Star', '../../assets/symbols/star.svg']
+};
+const IDS = Object.keys(SYMBOLS);
+const CARD = 260;
+const LAYOUTS = [
+  [{ r: 0, a: 0, s: 0.25 }, { r: 0.315, a: 0, s: 0.2 }, { r: 0.315, a: 51.43, s: 0.17 }, { r: 0.315, a: 102.86, s: 0.21 }, { r: 0.315, a: 154.29, s: 0.18 }, { r: 0.315, a: 205.71, s: 0.2 }, { r: 0.315, a: 257.14, s: 0.17 }, { r: 0.315, a: 308.57, s: 0.19 }],
+  [{ r: 0.145, a: 0, s: 0.19 }, { r: 0.145, a: 120, s: 0.17 }, { r: 0.145, a: 240, s: 0.2 }, { r: 0.335, a: 36, s: 0.19 }, { r: 0.335, a: 108, s: 0.21 }, { r: 0.335, a: 180, s: 0.17 }, { r: 0.335, a: 252, s: 0.2 }, { r: 0.335, a: 324, s: 0.18 }]
+];
+const TONES = {
+  hint: { bg: '#2A4A3E', border: '#2A4A3E', fg: '#C9D8CD' },
+  good: { bg: '#F2B54A', border: '#F2B54A', fg: '#2A1D14' },
+  bad: { bg: '#EFA184', border: '#EFA184', fg: '#2A1D14' },
+  opp: { bg: 'transparent', border: '#F09A84', fg: '#F09A84' }
+};
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function makeCard(ids) {
+  return {
+    ids: shuffle(ids),
+    layout: Math.random() < 0.5 ? 0 : 1,
+    spin: Math.floor(Math.random() * 360),
+    rots: ids.map(() => Math.round(Math.random() * 70 - 35))
+  };
+}
+function nextPile(youIds) {
+  const shared = youIds[Math.floor(Math.random() * youIds.length)];
+  const rest = shuffle(IDS.filter((id) => youIds.indexOf(id) < 0)).slice(0, 7);
+  return makeCard([shared].concat(rest));
+}
+function slotsOf(card) {
+  return card.ids.map((id, i) => {
+    const L = LAYOUTS[card.layout][i];
+    const ang = (L.a + card.spin) * Math.PI / 180;
+    const size = Math.round(L.s * CARD);
+    const cx = CARD / 2 + L.r * CARD * Math.cos(ang);
+    const cy = CARD / 2 + L.r * CARD * Math.sin(ang);
+    return { id: id, left: Math.round(cx - size / 2), top: Math.round(cy - size / 2), size: size, rot: card.rots[i] };
+  });
+}
+function freshState(pileSize) {
+  const you = makeCard(shuffle(IDS).slice(0, 8));
+  return {
+    you: you, pile: nextPile(you.ids), phase: 'play', started: false, finished: false,
+    youScore: 0, oppScore: 0, left: pileSize,
+    hit: null, oppHit: null, miss: null, missWhere: null,
+    toast: 'Find the one picture both cards share', tone: 'hint', toastFlip: false,
+    pileFlip: false, youAnim: '', shakeWhere: null, shakeFlip: false,
+    streak: 0, bestStreak: 0, best: null, roundStart: 0,
+    oppStatus: 'Ready when you are'
+  };
+}
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = freshState(this.pileSize());
+  }
+  pileSize() {
+    return Math.max(4, Math.min(40, this.props.pileSize ?? 12));
+  }
+  componentWillUnmount() {
+    this.clearAll();
+  }
+  clearAll() {
+    this.timers.forEach((t) => clearTimeout(t));
+    this.timers = [];
+    clearTimeout(this.oppT);
+  }
+  later(fn, ms) {
+    this.timers.push(setTimeout(fn, ms));
+  }
+  sharedId() {
+    const s = this.state;
+    return s.pile.ids.find((id) => s.you.ids.indexOf(id) >= 0);
+  }
+  scheduleOpp() {
+    clearTimeout(this.oppT);
+    this.oppT = setTimeout(() => this.oppClaim(), 5200 + Math.random() * 4300);
+  }
+  tap(id, where) {
+    const s = this.state;
+    if (s.finished || s.phase !== 'play') return;
+    const now = Date.now();
+    const extra = {};
+    if (!s.started) {
+      extra.started = true;
+      extra.oppStatus = 'Looking closely…';
+      this.scheduleOpp();
+    }
+    if (id === this.sharedId()) {
+      clearTimeout(this.oppT);
+      const t = s.started ? (now - s.roundStart) / 1000 : null;
+      const best = t !== null && (s.best === null || t < s.best) ? t : s.best;
+      const streak = s.streak + 1;
+      this.setState(Object.assign(extra, {
+        phase: 'won', hit: id, youScore: s.youScore + 1, streak: streak,
+        bestStreak: Math.max(s.bestStreak, streak), best: best,
+        toast: SYMBOLS[id][0] + '! The card is yours', tone: 'good', toastFlip: !s.toastFlip,
+        oppStatus: 'Hmm…'
+      }));
+      this.later(() => this.advance('you'), 750);
+    } else {
+      this.setState(Object.assign(extra, {
+        phase: 'frozen', miss: id, missWhere: where, streak: 0,
+        toast: 'Not that one — 1 second pause', tone: 'bad', toastFlip: !s.toastFlip,
+        shakeWhere: where, shakeFlip: !s.shakeFlip
+      }));
+      this.later(() => {
+        if (this.state.phase === 'frozen') {
+          this.setState({ phase: 'play', miss: null, missWhere: null, toast: 'Keep looking…', tone: 'hint', toastFlip: !this.state.toastFlip });
+        }
+      }, 1000);
+    }
+  }
+  oppClaim() {
+    const s = this.state;
+    if (s.finished || !(s.phase === 'play' || s.phase === 'frozen')) return;
+    const shared = this.sharedId();
+    const others = s.pile.ids.filter((id) => id !== shared);
+    const oh = others[Math.floor(Math.random() * others.length)];
+    const name = SYMBOLS[oh][0].toLowerCase();
+    this.setState({
+      phase: 'lost', oppHit: oh, miss: null, missWhere: null, oppScore: s.oppScore + 1, streak: 0,
+      toast: 'Ema spotted the ' + name + ' first', tone: 'opp', toastFlip: !s.toastFlip,
+      oppStatus: 'Got the ' + name + '!'
+    });
+    this.later(() => this.advance('opp'), 1100);
+  }
+  advance(who) {
+    const s = this.state;
+    const left = s.left - 1;
+    if (left <= 0) {
+      clearTimeout(this.oppT);
+      this.setState({ left: 0, finished: true, phase: 'done', hit: null, oppHit: null });
+      return;
+    }
+    const common = {
+      left: left, phase: 'play', hit: null, oppHit: null, miss: null, missWhere: null,
+      pileFlip: !s.pileFlip, roundStart: Date.now(), oppStatus: 'Looking closely…',
+      toast: left === 1 ? 'Last card in the pile!' : 'Next card!', tone: 'hint', toastFlip: !s.toastFlip
+    };
+    if (who === 'you') {
+      const you = s.pile;
+      this.setState(Object.assign(common, { you: you, pile: nextPile(you.ids), youAnim: s.youAnim === 'slideA' ? 'slideB' : 'slideA' }));
+    } else {
+      this.setState(Object.assign(common, { pile: nextPile(s.you.ids) }));
+    }
+    this.scheduleOpp();
+  }
+  rematch() {
+    this.clearAll();
+    this.setState(freshState(this.pileSize()));
+  }
+  renderVals() {
+    const s = this.state;
+    const mk = (card, where) => slotsOf(card).map((p) => {
+      let bg = 'transparent';
+      let ring = 'none';
+      let scale = 1;
+      if (s.hit === p.id) { bg = 'rgba(242, 181, 74, 0.3)'; ring = '0 0 0 4px #F2B54A'; scale = 1.14; }
+      else if (where === 'pile' && s.oppHit === p.id) { bg = 'rgba(240, 154, 132, 0.25)'; ring = '0 0 0 4px #F09A84'; scale = 1.1; }
+      else if (s.miss === p.id && s.missWhere === where) { bg = 'rgba(217, 105, 63, 0.16)'; ring = '0 0 0 3px #D9693F'; scale = 0.92; }
+      return {
+        left: p.left, top: p.top, size: p.size, rot: p.rot,
+        src: SYMBOLS[p.id][1], label: SYMBOLS[p.id][0],
+        bg: bg, ring: ring, scale: scale,
+        pick: () => this.tap(p.id, where)
+      };
+    });
+    const tone = TONES[s.tone] || TONES.hint;
+    return {
+      pileSlots: mk(s.pile, 'pile'),
+      youSlots: mk(s.you, 'you'),
+      pileDeal: s.pileFlip ? 'dealB' : 'dealA',
+      youDeal: s.youAnim,
+      pileShake: s.shakeWhere === 'pile' ? (s.shakeFlip ? 'shakeA' : 'shakeB') : '',
+      youShake: s.shakeWhere === 'you' ? (s.shakeFlip ? 'shakeA' : 'shakeB') : '',
+      cardOpacity: s.phase === 'frozen' ? 0.6 : 1,
+      toast: s.toast,
+      toastAnim: s.toastFlip ? 'popA' : 'popB',
+      toastBg: tone.bg, toastBorder: tone.border, toastFg: tone.fg,
+      left: s.left,
+      leftLabel: s.left + ' cards left in the pile',
+      oppStatus: s.oppStatus,
+      oppScore: s.oppScore,
+      oppScoreLabel: 'Ema has ' + s.oppScore + ' cards',
+      youScore: s.youScore,
+      youScoreLabel: 'You have ' + s.youScore + ' cards',
+      youSub: s.streak >= 2 ? 'Your card · ' + s.streak + ' in a row' : 'Your card',
+      finished: s.finished,
+      bestText: s.best === null ? '—' : s.best.toFixed(1) + ' s',
+      bestStreak: s.bestStreak,
+      rematch: () => this.rematch()
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+/* Snug Spot — design tokens (from the Design canvas). Import once at the app root. */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..800&display=swap');
+
+:root {
+  /* Table (dark pine felt) */
+  --felt: #1F3B31;              /* page background */
+  --felt-dot: rgba(255, 240, 215, 0.045);
+  --panel: #2A4A3E;             /* rows, chips, inputs, segmented track */
+  --panel-raised: #34584A;      /* selected token tile */
+  --line: #3E6152;              /* input borders, stat tile borders, switch off */
+  --line-strong: #5E8172;       /* secondary button border, dashed empty states */
+
+  /* Text on felt */
+  --text: #FBF1DE;              /* linen — primary text */
+  --text-soft: #C9D8CD;         /* body copy, taglines */
+  --text-muted: #B9CCBF;        /* labels, captions, statuses (passes 4.5:1 on --felt and --panel) */
+  --placeholder: #9FB8A9;       /* lightened from the mockup's #8FA99A to pass 4.5:1 */
+
+  /* Cards */
+  --card: #FFF8EC;              /* card face and token discs */
+  --card-edge: #D8C29C;         /* 6px "thickness" shadow under cards and code tiles */
+  --card-stitch: #E8D6B4;       /* dashed ring 9px inside the card edge */
+  --ink: #2A1D14;               /* text on honey, coral and cream */
+
+  /* Players & feedback */
+  --honey: #F2B54A;             /* YOU, primary buttons, correct match */
+  --honey-edge: #B9822A;        /* 4px shadow under primary buttons */
+  --honey-tint: rgba(242, 181, 74, 0.16);
+  --honey-on-tint: #F7C96F;     /* small text inside honey-tint pills (4.7:1) */
+  --coral: #F09A84;             /* OPPONENT (text-safe on felt) */
+  --coral-tint: rgba(240, 154, 132, 0.16);
+  --coral-on-tint: #F8BFAE;     /* small text inside coral-tint pills (4.8:1) */
+  --miss: #D9693F;              /* ring on a wrong tap */
+  --miss-toast: #EFA184;        /* wrong-tap toast background (ink text) */
+  --ok: #B5DDBF;                /* "Ready" chip text */
+  --ok-tint: rgba(127, 168, 138, 0.2);
+
+  /* Type */
+  --font-display: 'Fredoka', system-ui, sans-serif;   /* headings, buttons, numbers, code tiles */
+  --font-body: 'Nunito', system-ui, sans-serif;       /* everything else */
+  --fs-hero: 52px;      /* Welcome wordmark */
+  --fs-h1-result: 46px; /* Results headline */
+  --fs-h1: 24px;        /* screen titles */
+  --fs-button: 20px;
+  --fs-body: 17px;
+  --fs-label: 14px;     /* UPPERCASE, 800, letter-spacing 1px */
+  --fs-small: 13px;
+  --fs-caption: 12px;   /* UPPERCASE, 800, letter-spacing 1.2px */
+
+  /* Shape */
+  --radius-button: 18px;
+  --radius-panel: 18px;
+  --radius-panel-lg: 24px;
+  --radius-input: 16px;
+  --radius-chip: 999px;
+  --button-height: 58px;
+  --input-height: 56px;
+  --tap-min: 44px;
+
+  /* Elevation */
+  --shadow-card: 0 6px 0 var(--card-edge), 0 16px 28px rgba(8, 20, 15, 0.45);
+  --shadow-tile: 0 5px 0 var(--card-edge);
+  --shadow-button: 0 4px 0 var(--honey-edge);
+
+  /* Motion */
+  --ease-bounce: cubic-bezier(0.2, 0.8, 0.2, 1.15);
+  --ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --dur-deal: 420ms;    /* new pile card drops in */
+  --dur-slide: 520ms;   /* won pile card slides down to become your card */
+  --dur-shake: 380ms;   /* wrong tap */
+  --dur-toast: 260ms;
+  --dur-press: 120ms;   /* buttons sink 3px on press */
+}
+
+.felt {
+  background-color: var(--felt);
+  background-image: radial-gradient(var(--felt-dot) 1px, transparent 1.4px);
+  background-size: 7px 7px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-deal: 1ms; --dur-slide: 1ms; --dur-shake: 1ms; --dur-toast: 1ms; }
+}

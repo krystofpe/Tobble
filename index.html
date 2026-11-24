@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Symbol Duel</title>
+<style>
+:root{
+  --bg:#f3efe6; --surface:#fffdf8; --ink:#1c2230; --muted:#5f6878; --line:#1c2230; --soft:#e8e1d2;
+  --accent:#0e7c6b; --accent-ink:#ffffff; --tint:#dff1ec; --warn:#c8401f; --ok:#1f9d6b; --gold:#f0b429; --card:#fffdf8;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141821; --surface:#1e2431; --ink:#f1ede4; --muted:#a2abbb; --line:#07090d; --soft:#2c3345;
+    --accent:#35bfa6; --accent-ink:#04211c; --tint:#1b3a38; --warn:#ff8466; --ok:#35c48b; --gold:#f5c451; --card:#f7f2e7;
+  }
+}
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{ margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.45 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,-apple-system,sans-serif; }
+button,input{ font:inherit; color:inherit; }
+h1{ font-size:1.5rem; line-height:1.2; margin:0 0 6px; letter-spacing:-.01em; }
+h2{ font-size:1.05rem; line-height:1.25; margin:0 0 12px; }
+p{ margin:0 0 10px; }
+.muted{ color:var(--muted); }
+.small{ font-size:.875rem; }
+.shell{ max-width:980px; margin:0 auto; padding:20px 16px 56px; }
+.narrow{ max-width:460px; margin:8vh auto 0; }
+
+.top{ display:flex; align-items:center; justify-content:space-between; gap:8px 16px; flex-wrap:wrap; margin-bottom:18px; }
+.brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.25rem; letter-spacing:-.01em; }
+.brand svg{ width:36px; height:36px; flex:none; }
+.link{ background:none; border:0; padding:0; margin-left:8px; color:var(--accent); font-weight:700; cursor:pointer; text-decoration:underline; }
+
+.panel{ background:var(--surface); border:2px solid var(--line); border-radius:18px; box-shadow:0 4px 0 var(--line); padding:18px; }
+.panel + .panel{ margin-top:18px; }
+.hero{ display:flex; align-items:center; justify-content:space-between; gap:16px 24px; flex-wrap:wrap; background:var(--tint); }
+.hero p{ margin:0; max-width:52ch; }
+.grid{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:18px; align-items:start; margin-top:18px; }
+@media (max-width:760px){ .grid{ grid-template-columns:minmax(0,1fr); } }
+
+.btn{ font-weight:700; padding:9px 16px; border-radius:12px; border:2px solid var(--line); background:var(--surface);
+  color:var(--ink); box-shadow:0 3px 0 var(--line); cursor:pointer; white-space:nowrap; touch-action:manipulation; }
+.btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
+.btn:disabled{ opacity:.55; cursor:default; }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); }
+.btn.big{ font-size:1.1rem; padding:13px 24px; }
+:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.row.end{ justify-content:flex-end; }
+.field{ width:100%; padding:11px 12px; border-radius:12px; border:2px solid var(--line); background:var(--surface); margin:6px 0 12px; }
+
+.note{ border:2px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:18px; background:var(--surface); }
+.note.warn{ border-color:var(--warn); }
+.note summary{ cursor:pointer; font-weight:700; color:var(--accent); margin-top:6px; }
+.note ol{ margin:10px 0 0; padding-left:22px; } .note li{ margin-bottom:8px; }
+code,pre{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.82rem; }
+code{ background:var(--soft); padding:1px 5px; border-radius:5px; }
+pre{ background:var(--soft); padding:12px; border-radius:10px; overflow:auto; max-height:260px; margin:8px 0; }
+
+.list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.duel{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; align-items:center; padding:12px 14px;
+  border:2px solid var(--soft); border-radius:14px; }
+.duel.mine{ border-color:var(--accent); background:var(--tint); }
+.duel .t{ font-weight:800; }
+.duel .wide{ grid-column:1 / -1; }
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+.chip{ display:inline-flex; gap:6px; align-items:baseline; padding:3px 10px; border-radius:999px; background:var(--soft);
+  font-size:.9rem; font-variant-numeric:tabular-nums; }
+.chip.win{ background:var(--gold); color:#1c2230; font-weight:700; }
+.time{ font-weight:800; font-variant-numeric:tabular-nums; }
+details.rounds summary{ cursor:pointer; color:var(--accent); font-weight:700; font-size:.875rem; margin-top:6px; }
+table{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td{ text-align:right; padding:6px 4px; border-bottom:1px solid var(--soft); }
+th{ font-size:.8rem; color:var(--muted); font-weight:700; }
+th:first-child,td:first-child{ text-align:left; }
+tr:last-child td{ border-bottom:0; }
+td.best{ font-weight:800; color:var(--ok); }
+.you{ font-size:.75rem; font-weight:700; color:var(--accent); margin-left:6px; }
+.invite{ display:flex; gap:8px; } .invite .field{ margin:0; min-width:0; flex:1; }
+ul.plain{ margin:0; padding-left:20px; } ul.plain li{ margin-bottom:6px; }
+
+.result{ text-align:center; }
+.result .bigtime{ font-size:clamp(2.6rem,10vw,4rem); font-weight:800; line-height:1.1; font-variant-numeric:tabular-nums; margin:6px 0; }
+.result .row{ justify-content:center; margin-top:16px; }
+
+/* ── play screen ── */
+.play{ height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden; position:relative;
+  user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+.hud{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; padding:14px 16px 8px; }
+.dots{ display:flex; gap:5px; }
+.dots i{ width:11px; height:11px; flex:none; border-radius:50%; border:2px solid var(--ink); }
+@media (max-width:520px){
+  .hud{ gap:8px; padding-left:12px; padding-right:12px; }
+  .dots{ gap:3px; } .dots i{ width:8px; height:8px; border-width:1.5px; }
+  .clock{ font-size:1.7rem; } .miss{ font-size:.8rem; }
+}
+.dots i.on{ background:var(--accent); border-color:var(--accent); }
+.clockwrap{ position:relative; text-align:center; }
+.clock{ font-size:2rem; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+.pen{ position:absolute; left:100%; top:0; margin-left:8px; color:var(--warn); font-weight:800; white-space:nowrap; opacity:0; }
+.pen.go{ animation:floatup .9s ease-out; }
+.miss{ text-align:right; font-size:.9rem; color:var(--muted); }
+.miss b{ color:var(--ink); font-size:1.05rem; margin-left:4px; }
+.stage{ flex:1; min-height:0; display:flex; align-items:center; justify-content:center; gap:clamp(14px,4vw,48px);
+  padding:8px 16px 22px; --d:min(44vw, calc(100dvh - 130px), 520px); }
+@media (orientation:portrait){
+  .stage{ flex-direction:column; gap:18px; --d:min(88vw, calc((100dvh - 150px) / 2), 520px); }
+}
+.card{ width:var(--d); height:var(--d); flex:none; position:relative; border-radius:50%; background:var(--card);
+  border:4px solid var(--line); box-shadow:0 6px 0 var(--line); }
+.card.pop{ animation:pop .18s ease-out; }
+.card.blank{ opacity:.45; }
+.sym{ position:absolute; width:calc(var(--d) * var(--s) / 2); height:calc(var(--d) * var(--s) / 2);
+  transform:translate(-50%,-50%) rotate(var(--r)); font-size:calc(var(--d) * var(--s) * 0.4); line-height:1;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
+  display:grid; place-items:center; padding:0; border:0; border-radius:50%; background:none; color:#1c2230; cursor:pointer;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+.sym span{ display:block; pointer-events:none; }
+.sym.hit{ box-shadow:0 0 0 4px var(--ok); background:rgba(31,157,107,.2); }
+.sym.hit span{ animation:pulse .35s ease; }
+.sym.miss{ animation:missring .45s ease-out; }
+.sym.miss span{ animation:shake .3s ease; }
+.overlay{ position:absolute; inset:0; display:grid; place-items:center; padding:16px; background:rgba(20,24,33,.35); }
+.overlay[hidden]{ display:none; }
+.intro{ max-width:440px; width:100%; }
+.count{ font-size:min(40vw,220px); font-weight:800; color:#fff; text-shadow:0 6px 0 rgba(0,0,0,.35); animation:pop .25s ease-out; }
+@keyframes pop{ from{ transform:scale(.86); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes pulse{ 50%{ transform:scale(1.25); } }
+@keyframes shake{ 25%{ transform:translateX(-12%); } 75%{ transform:translateX(12%); } }
+@keyframes missring{ from{ box-shadow:0 0 0 4px var(--warn); background:rgba(200,64,31,.2); } to{ box-shadow:0 0 0 4px transparent; background:transparent; } }
+@keyframes floatup{ from{ opacity:1; transform:translateY(6px); } to{ opacity:0; transform:translateY(-22px); } }
+@media (prefers-reduced-motion:reduce){ *{ animation-duration:.01ms !important; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>This game needs JavaScript.</noscript>
+<script>
+(() => {
+'use strict';
+
+/* ─────────────────────────── 1. SETTINGS ───────────────────────────
+   Shared scoreboard: paste your Supabase project URL and publishable key between
+   the quotes, e.g.
+     const SUPABASE_URL = 'https://abcdefghijklmnop.supabase.co';
+     const SUPABASE_KEY = 'sb_publishable_...';
+   While they are empty the game runs in demo mode and keeps scores only in this
+   browser. The step-by-step guide is inside the game ("Set up the shared
+   scoreboard"). The publishable key is meant to be public; never put the secret
+   key here. */
+const SUPABASE_URL = '';
+const SUPABASE_KEY = '';
+const POLL_MS = 10000;                 // how often an open game checks for the opponent's moves
+
+const PAIRS = 10;                      // card pairs per duel
+const PENALTY_MS = 3000;               // added for every wrong tap
+const TIME_LIMIT_MS = 10 * 60 * 1000;  // a duel left unfinished this long counts as "out of time"
+const ORDER = 7;                       // 7 -> 57 cards with 8 symbols each (must be a prime number)
+
+const SYMBOLS = [
+  ['🍎','apple'],['🍌','banana'],['🍇','grapes'],['🍓','strawberry'],['🍉','watermelon'],['🍍','pineapple'],
+  ['🍒','cherries'],['🥕','carrot'],['🌽','corn'],['🍄','mushroom'],['🌵','cactus'],['🌲','pine tree'],
+  ['🌻','sunflower'],['🍀','clover'],['🔥','fire'],['⚡','lightning'],['❄️','snowflake'],['🌈','rainbow'],
+  ['🌙','moon'],['⭐','star'],['☀️','sun'],['☂️','umbrella'],['🎈','balloon'],['🎁','gift'],
+  ['🎲','dice'],['🎯','target'],['🎸','guitar'],['🎺','trumpet'],['🥁','drum'],['⚽','football'],
+  ['🏀','basketball'],['🚀','rocket'],['✈️','airplane'],['🚗','car'],['🚲','bicycle'],['⛵','sailboat'],
+  ['⚓','anchor'],['🔑','key'],['🔒','padlock'],['💡','light bulb'],['🔔','bell'],['✂️','scissors'],
+  ['🔨','hammer'],['🧲','magnet'],['❤️','heart'],['💎','gem'],['👑','crown'],['👻','ghost'],
+  ['🤖','robot'],['👽','alien'],['🐱','cat'],['🐶','dog'],['🐸','frog'],['🐙','octopus'],
+  ['🦋','butterfly'],['🐢','turtle'],['🐝','bee'],['🐧','penguin'],['🐟','fish'],['🍕','pizza'],
+  ['🍩','doughnut'],['☕','coffee'],['🎩','top hat'],['⏰','alarm clock'],
+];
+
+const SETUP_SQL = `-- Symbol Duel: shared scoreboard. Run this once in the Supabase SQL Editor.
+-- Everything it creates starts with "symbol_", so it is safe in an existing project,
+-- and running it again does no harm.
+--
+-- The game never reads or writes the tables directly. It calls the three functions
+-- below, which check every value and refuse to change a finished result.
+
+create table if not exists public.symbol_duels (
+  id         text primary key check (id ~ '^[a-z0-9]{8,24}$'),
+  room       text not null check (room ~ '^[a-z0-9]{16,40}$'),
+  seed       integer not null check (seed >= 0),
+  created_by text not null check (char_length(created_by) between 1 and 40),
+  created_at timestamptz not null default now()
+);
+create index if not exists symbol_duels_room on public.symbol_duels (room);
+
+create table if not exists public.symbol_results (
+  duel_id     text not null references public.symbol_duels (id) on delete cascade,
+  player_key  text not null check (char_length(player_key) between 1 and 60),
+  room        text not null,
+  name        text not null check (char_length(name) between 1 and 40),
+  started_at  bigint not null,
+  finished_at bigint,
+  time_ms     integer check (time_ms >= 0),
+  mistakes    integer not null default 0 check (mistakes >= 0),
+  splits      integer[] not null default '{}' check (cardinality(splits) <= 10),
+  dnf         boolean not null default false,
+  primary key (duel_id, player_key)
+);
+create index if not exists symbol_results_room on public.symbol_results (room);
+
+-- Lock the tables: row level security with no policies, and no table rights for API users.
+alter table public.symbol_duels enable row level security;
+alter table public.symbol_results enable row level security;
+revoke all on public.symbol_duels, public.symbol_results from anon, authenticated;
+
+-- Everything stored for one game. A game is found only by its unguessable id.
+create or replace function public.symbol_duel_room(p_room text)
+returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if p_room is null or p_room !~ '^[a-z0-9]{16,40}$' then
+    raise exception 'Unknown game.';
+  end if;
+  return jsonb_build_object(
+    'duels', coalesce((
+      select jsonb_agg(jsonb_build_object(
+               'id', d.id, 'seed', d.seed, 'createdBy', d.created_by,
+               'createdAt', floor(extract(epoch from d.created_at) * 1000)::bigint)
+             order by d.created_at, d.id)
+      from public.symbol_duels d where d.room = p_room), '[]'::jsonb),
+    'results', coalesce((
+      select jsonb_agg(jsonb_build_object(
+               'id', r.duel_id || '_' || r.player_key, 'duelId', r.duel_id,
+               'key', r.player_key, 'name', r.name,
+               'startedAt', r.started_at, 'finishedAt', r.finished_at, 'timeMs', r.time_ms,
+               'mistakes', r.mistakes, 'splits', to_jsonb(r.splits), 'dnf', r.dnf))
+      from public.symbol_results r where r.room = p_room), '[]'::jsonb));
+end;
+$$;
+
+-- A new duel. Duels are never changed or deleted.
+create or replace function public.symbol_duel_create(p_room text, p_id text, p_seed integer, p_created_by text)
+returns void
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  if p_room is null or p_room !~ '^[a-z0-9]{16,40}$' then
+    raise exception 'Unknown game.';
+  end if;
+  if (select count(*) from public.symbol_duels d where d.room = p_room) >= 5000 then
+    raise exception 'This game has reached its limit of 5000 duels.';
+  end if;
+  insert into public.symbol_duels (id, room, seed, created_by)
+  values (p_id, p_room, p_seed, btrim(p_created_by))
+  on conflict (id) do nothing;
+  if not exists (select 1 from public.symbol_duels d where d.id = p_id and d.room = p_room) then
+    raise exception 'That duel id is already in use.';
+  end if;
+end;
+$$;
+
+-- One player's result for one duel: stored when the clock starts, completed at the finish.
+-- A result with a finish time is final.
+create or replace function public.symbol_duel_save_result(p_room text, p_result jsonb)
+returns void
+language plpgsql security definer set search_path = ''
+as $$
+declare
+  v_duel     text := p_result ->> 'duelId';
+  v_key      text := p_result ->> 'key';
+  v_name     text := btrim(p_result ->> 'name');
+  v_dnf      boolean := coalesce(p_result -> 'dnf' = 'true'::jsonb, false);
+  v_started  bigint;
+  v_finished bigint;
+  v_time     integer;
+  v_mistakes integer := 0;
+  v_splits   integer[] := '{}';
+  v_old      public.symbol_results;
+begin
+  if p_room is null or p_room !~ '^[a-z0-9]{16,40}$' then
+    raise exception 'Unknown game.';
+  end if;
+  if jsonb_typeof(p_result) is distinct from 'object' then
+    raise exception 'A result must be an object.';
+  end if;
+  if not exists (select 1 from public.symbol_duels d where d.id = v_duel and d.room = p_room) then
+    raise exception 'Unknown duel.';
+  end if;
+  if jsonb_typeof(p_result -> 'startedAt') is distinct from 'number' then
+    raise exception 'A result needs a start time.';
+  end if;
+  v_started := round((p_result ->> 'startedAt')::numeric);
+  if jsonb_typeof(p_result -> 'finishedAt') = 'number' then
+    v_finished := round((p_result ->> 'finishedAt')::numeric);
+    if jsonb_typeof(p_result -> 'timeMs') = 'number' then
+      v_time := round((p_result ->> 'timeMs')::numeric);
+    end if;
+    if v_time is null and not v_dnf then
+      raise exception 'A finished result needs a time.';
+    end if;
+  end if;
+  if jsonb_typeof(p_result -> 'mistakes') = 'number' then
+    v_mistakes := round((p_result ->> 'mistakes')::numeric);
+  end if;
+  if jsonb_typeof(p_result -> 'splits') = 'array' then
+    if jsonb_array_length(p_result -> 'splits') > 10
+       or exists (select 1 from jsonb_array_elements(p_result -> 'splits') e where jsonb_typeof(e) <> 'number') then
+      raise exception 'Splits must be at most 10 numbers.';
+    end if;
+    select coalesce(array_agg(round((e #>> '{}')::numeric)::integer order by n), '{}')
+      into v_splits
+      from jsonb_array_elements(p_result -> 'splits') with ordinality as t(e, n);
+  end if;
+  v_dnf := v_dnf and v_finished is not null;
+
+  select * into v_old from public.symbol_results r
+   where r.duel_id = v_duel and r.player_key = v_key
+   for update;
+  if not found then
+    if (select count(*) from public.symbol_results r where r.duel_id = v_duel) >= 10 then
+      raise exception 'This duel already has 10 players.';
+    end if;
+    insert into public.symbol_results
+      (duel_id, player_key, room, name, started_at, finished_at, time_ms, mistakes, splits, dnf)
+    values (v_duel, v_key, p_room, v_name, v_started, v_finished, v_time, v_mistakes, v_splits, v_dnf);
+  elsif v_old.finished_at is not null then
+    if v_old.finished_at = v_finished and v_old.time_ms is not distinct from v_time then
+      return;  -- the same final result sent twice
+    end if;
+    raise exception 'This result is already final.';
+  elsif v_old.started_at <> v_started then
+    raise exception 'The start time cannot change.';
+  else
+    update public.symbol_results
+       set name = v_name, finished_at = v_finished, time_ms = v_time,
+           mistakes = v_mistakes, splits = v_splits, dnf = v_dnf
+     where duel_id = v_duel and player_key = v_key;
+  end if;
+end;
+$$;
+
+-- Only these three functions are reachable with the publishable key.
+revoke all on function public.symbol_duel_room(text) from public, anon, authenticated;
+revoke all on function public.symbol_duel_create(text, text, integer, text) from public, anon, authenticated;
+revoke all on function public.symbol_duel_save_result(text, jsonb) from public, anon, authenticated;
+grant execute on function public.symbol_duel_room(text) to anon, authenticated;
+grant execute on function public.symbol_duel_create(text, text, integer, text) to anon, authenticated;
+grant execute on function public.symbol_duel_save_result(text, jsonb) to anon, authenticated;
+
+notify pgrst, 'reload schema';
+`;
+
+/* ─────────────────────────── 2. CARDS ─────────────────────────── */
+// Small seeded random generator: the same seed gives both players the same duel.
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffle(list, rnd){
+  for (let i = list.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+// Finite projective plane of order n: n*n + n + 1 cards, n + 1 symbols per card,
+// and any two cards share exactly one symbol.
+function buildDeck(n){
+  const cards = [];
+  for (let i = 0; i <= n; i++){
+    const card = [0];
+    for (let j = 0; j < n; j++) card.push(1 + i * n + j);
+    cards.push(card);
+  }
+  for (let i = 0; i < n; i++){
+    for (let j = 0; j < n; j++){
+      const card = [i + 1];
+      for (let k = 0; k < n; k++) card.push(n + 1 + n * k + (i * k + j) % n);
+      cards.push(card);
+    }
+  }
+  return cards;
+}
+// One symbol in the middle, the rest on a ring, each with its own size and rotation.
+function layoutCard(ids, rnd){
+  const ring = ids.length - 1, turn = rnd() * Math.PI * 2;
+  const items = ids.map((id, i) => {
+    if (i === 0){
+      const x = (rnd() - 0.5) * 0.08, y = (rnd() - 0.5) * 0.08;
+      return { id, x, y, size: 0.40 + rnd() * 0.20, rot: Math.floor(rnd() * 360) };
+    }
+    const angle = turn + (i - 1) * 2 * Math.PI / ring, radius = 0.62 + (rnd() - 0.5) * 0.03;
+    return { id, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
+             size: 0.30 + rnd() * 0.16, rot: Math.floor(rnd() * 360) };
+  });
+  return { ids, items };
+}
+// A duel is a chain of PAIRS + 1 cards: pair k is card k with card k + 1.
+function buildDuel(seed){
+  const rnd = mulberry32(seed >>> 0);
+  const picture = shuffle(SYMBOLS.map((_, i) => i), rnd);
+  const deck = shuffle(buildDeck(ORDER), rnd).slice(0, PAIRS + 1);
+  return deck.map(card => layoutCard(shuffle(card.map(s => picture[s]), rnd), rnd));
+}
+
+/* ─────────────────────────── 3. HELPERS ─────────────────────────── */
+const $app = document.getElementById('app');
+
+function h(tag, props, ...kids){
+  const el = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)){
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'style') el.style.cssText = v;
+    else if (k === 'text') el.textContent = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat(Infinity)){
+    if (kid == null || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+function fmt(ms){
+  if (!Number.isFinite(ms)) return '—';
+  const cs = Math.round(ms / 10), m = Math.floor(cs / 6000), s = (cs - m * 6000) / 100;
+  return m ? `${m}:${s.toFixed(2).padStart(5, '0')}` : `${s.toFixed(2)} s`;
+}
+function fmtWhen(ts){
+  try { return new Date(ts).toLocaleString(undefined, { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
+  catch { return ''; }
+}
+function randomId(len){
+  const abc = 'abcdefghijkmnpqrstuvwxyz23456789', buf = new Uint32Array(len);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(buf);
+  else for (let i = 0; i < len; i++) buf[i] = Math.floor(Math.random() * 4294967296);
+  return Array.from(buf, v => abc[v % abc.length]).join('');
+}
+// The scoreboard recognises a player by this key, so "Vanda" and " vanda " are the same person.
+function slug(name){
+  const base = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (base) return base.slice(0, 40);
+  return ('u' + Array.from(name.toLowerCase()).map(c => c.codePointAt(0).toString(16)).join('')).slice(0, 40);
+}
+function listNames(names){
+  if (names.length <= 1) return names[0] || '';
+  return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+}
+// Browser storage can be missing (private windows, embedded previews): fall back to memory.
+const mem = new Map();
+const store = {
+  get(k){ try { const v = localStorage.getItem(k); if (v != null) return v; } catch {} return mem.has(k) ? mem.get(k) : null; },
+  set(k, v){ mem.set(k, v); try { localStorage.setItem(k, v); } catch {} },
+};
+const K = { name:'symbolduel:name', room:'symbolduel:room', demo:'symbolduel:demo',
+            local:(room, key) => `symbolduel:local:${room}:${key}` };
+
+/* ─────────────────────────── 4. STORAGE BACKENDS ───────────────────────────
+   Both keep two lists: duels {id, seed, createdAt, createdBy} and
+   results {id, duelId, key, name, startedAt, finishedAt, timeMs, mistakes, splits, dnf}.
+   subscribe() returns { stop(), now() }: now() asks for fresh data straight away. */
+function localBackend(){
+  const read = () => { try { const v = JSON.parse(store.get(K.demo)); if (v && v.duels && v.results) return v; } catch {} return { duels:[], results:[] }; };
+  let data = read();
+  const subs = new Set();
+  const changed = () => { store.set(K.demo, JSON.stringify(data)); subs.forEach(f => f()); };
+  window.addEventListener('storage', e => { if (e.key === K.demo){ data = read(); subs.forEach(f => f()); } });
+  return {
+    mode: 'local',
+    subscribe(room, { onData }){
+      const f = () => onData(data.duels.slice(), data.results.slice());
+      subs.add(f); setTimeout(f, 0);
+      return { stop: () => subs.delete(f), now: () => {} };
+    },
+    async createDuel(room, duel){ data.duels.push(duel); changed(); },
+    async saveResult(room, result){
+      const i = data.results.findIndex(r => r.id === result.id);
+      if (i < 0) data.results.push(result);
+      else if (data.results[i].finishedAt != null) throw Object.assign(new Error('This duel is already finished.'), { code: 'rejected' });
+      else data.results[i] = result;
+      changed();
+    },
+  };
+}
+
+// Supabase: the page only calls the three database functions from the setup SQL.
+function supabaseBackend(url, key){
+  const endpoint = url.replace(/\/+$/, '') + '/rest/v1/rpc/';
+  const headers = { 'Content-Type': 'application/json', apikey: key };
+  // A publishable key travels in the apikey header only; a legacy anon key (a JWT) also as a bearer token.
+  if (/^eyJ/.test(key)) headers.Authorization = 'Bearer ' + key;
+  async function call(fn, args){
+    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 10000);
+    let res, text = '';
+    try {
+      res = await fetch(endpoint + fn, { method: 'POST', headers, body: JSON.stringify(args), cache: 'no-store', signal: ctrl.signal });
+      text = await res.text();
+    } catch {
+      throw Object.assign(new Error('The scoreboard cannot be reached.'), { code: ctrl.signal.aborted ? 'timeout' : 'unavailable' });
+    } finally { clearTimeout(timer); }
+    if (!res.ok){
+      let body = null; try { body = JSON.parse(text); } catch {}
+      const code = res.status === 540 ? 'paused'
+        : res.status === 404 ? 'not-set-up'
+        : res.status === 401 || res.status === 403 ? 'permission-denied'
+        : res.status === 402 ? 'restricted'
+        : res.status >= 500 ? 'unavailable' : 'rejected';
+      throw Object.assign(new Error((body && typeof body.message === 'string' && body.message) || 'HTTP ' + res.status), { code, status: res.status });
+    }
+    if (!text) return null;
+    try { return JSON.parse(text); }
+    catch { throw Object.assign(new Error('Unexpected answer from the scoreboard.'), { code: 'unavailable' }); }
+  }
+  return {
+    mode: 'cloud',
+    // Checks for news every POLL_MS while the page is visible and isActive() says so,
+    // and straight away when the tab comes back or the connection returns.
+    subscribe(room, { onData, onError, isActive }){
+      let stopped = false, running = false, again = false, timer = 0;
+      const tick = async () => {
+        clearTimeout(timer);
+        if (stopped) return;
+        if (running){ again = true; return; }
+        if (document.hidden || (isActive && !isActive())){ timer = setTimeout(tick, POLL_MS); return; }
+        running = true; again = false;
+        try {
+          const data = await call('symbol_duel_room', { p_room: room });
+          if (!stopped) onData(Array.isArray(data && data.duels) ? data.duels : [], Array.isArray(data && data.results) ? data.results : []);
+        } catch (e){ if (!stopped) onError(e); }
+        finally {
+          running = false;
+          if (!stopped) timer = setTimeout(tick, again ? 0 : POLL_MS);
+        }
+      };
+      const wake = () => { if (!document.hidden) tick(); };
+      document.addEventListener('visibilitychange', wake);
+      window.addEventListener('online', wake);
+      tick();
+      return {
+        stop(){ stopped = true; clearTimeout(timer); document.removeEventListener('visibilitychange', wake); window.removeEventListener('online', wake); },
+        now: tick,
+      };
+    },
+    createDuel(room, duel){
+      return call('symbol_duel_create', { p_room: room, p_id: duel.id, p_seed: duel.seed, p_created_by: duel.createdBy });
+    },
+    saveResult(room, r){
+      const result = { duelId: r.duelId, key: r.key, name: r.name, startedAt: r.startedAt };
+      for (const k of ['finishedAt', 'timeMs', 'mistakes', 'splits', 'dnf']) if (r[k] != null) result[k] = r[k];
+      return call('symbol_duel_save_result', { p_room: room, p_result: result });
+    },
+  };
+}
+
+// Whatever comes back from storage is treated as untrusted data.
+function cleanDuel(d){
+  return { id: String(d.id), seed: Math.trunc(Number(d.seed) || 0), createdAt: Number(d.createdAt) || 0,
+           createdBy: String(d.createdBy || '').slice(0, 40) };
+}
+function cleanResult(r){
+  const finishedAt = r.finishedAt == null ? null : Number(r.finishedAt) || 0;
+  const timeMs = Number.isFinite(r.timeMs) && r.timeMs >= 0 ? r.timeMs : null;
+  return { id: String(r.id), duelId: String(r.duelId || ''), key: String(r.key || ''),
+           name: String(r.name || 'Player').slice(0, 40), startedAt: Number(r.startedAt) || 0, finishedAt, timeMs,
+           mistakes: Math.max(0, Math.trunc(Number(r.mistakes) || 0)),
+           splits: Array.isArray(r.splits) ? r.splits.filter(Number.isFinite).slice(0, PAIRS) : [],
+           dnf: finishedAt != null && (r.dnf === true || timeMs == null) };
+}
+
+/* ─────────────────────────── 5. APP STATE ─────────────────────────── */
+const state = {
+  backend: null, room: null, player: null, screen: 'boot', fatal: null,
+  duels: [], results: [], sig: '', loaded: false, slow: false, error: null, feed: null,
+  created: [],                      // duels started on this page, kept until the scoreboard lists them
+  local: { prog: {}, final: {} },   // this player's unfinished duel and unsaved results, kept in the browser
+  shown: null,                      // the result screen being shown
+  open: new Set(),                  // expanded "Pair by pair" panels
+  saving: new Map(), sent: new Set(), refused: new Set(),
+};
+const isDone = r => r.finishedAt != null;
+const isDemo = () => state.backend && state.backend.mode === 'local';
+
+function syncLocal(){
+  state.local = { prog: {}, final: {} };
+  if (!state.room || !state.player) return;
+  try {
+    const v = JSON.parse(store.get(K.local(state.room, state.player.key)));
+    if (v && v.prog && v.final) state.local = v;
+  } catch {}
+}
+function saveLocal(){
+  if (state.room && state.player) store.set(K.local(state.room, state.player.key), JSON.stringify(state.local));
+}
+// Stored results plus this player's finished-but-not-yet-saved ones.
+function allResults(){
+  const out = state.results.slice();
+  for (const f of Object.values(state.local.final)){
+    const i = out.findIndex(r => r.id === f.id);
+    if (i < 0) out.push(cleanResult(f)); else if (!isDone(out[i])) out[i] = cleanResult(f);
+  }
+  return out;
+}
+function winnersOf(done){
+  const timed = done.filter(r => !r.dnf);
+  if (done.length < 2 || !timed.length) return [];
+  const best = Math.min(...timed.map(r => r.timeMs));
+  return timed.filter(r => r.timeMs === best).map(r => r.key);
+}
+function summarize(){
+  const me = state.player ? state.player.key : '';
+  const duels = state.duels.slice().sort((a, b) => a.createdAt - b.createdAt || (a.id < b.id ? -1 : 1));
+  const byDuel = new Map(duels.map(d => [d.id, []]));
+  for (const r of allResults()){ const list = byDuel.get(r.duelId); if (list) list.push(r); }
+  return duels.map((duel, i) => {
+    const results = byDuel.get(duel.id);
+    const mine = results.find(r => r.key === me) || null;
+    const done = results.filter(isDone).sort((a, b) => (a.dnf - b.dnf) || (a.timeMs - b.timeMs));
+    const othersDone = done.filter(r => r.key !== me);
+    const status = !mine ? 'todo' : !isDone(mine) ? 'playing' : othersDone.length ? 'done' : 'waiting';
+    return { duel, no: i + 1, mine, done, othersDone, status, winners: winnersOf(done) };
+  });
+}
+// Only duels that at least two players have finished count, so both sides are compared on the same cards.
+function leaderboard(rows){
+  const players = new Map();
+  for (const row of rows){
+    if (row.done.length < 2) continue;
+    for (const r of row.done){
+      let p = players.get(r.key);
+      if (!p){ p = { key: r.key, name: r.name, seen: 0, wins: 0, losses: 0, ties: 0, n: 0, sum: 0, best: null }; players.set(r.key, p); }
+      if (r.finishedAt >= p.seen){ p.seen = r.finishedAt; p.name = r.name; }
+      if (row.winners.includes(r.key)){ if (row.winners.length > 1) p.ties++; else p.wins++; } else p.losses++;
+      if (!r.dnf){ p.n++; p.sum += r.timeMs; if (p.best == null || r.timeMs < p.best) p.best = r.timeMs; }
+    }
+  }
+  const avg = p => p.n ? p.sum / p.n : Infinity;
+  return [...players.values()].sort((a, b) => b.wins - a.wins || a.losses - b.losses || avg(a) - avg(b));
+}
+function otherPlayers(){
+  const me = state.player ? state.player.key : '', names = new Map();
+  for (const d of state.duels) if (d.createdBy) names.set(slug(d.createdBy), d.createdBy);
+  for (const r of state.results) names.set(r.key, r.name);
+  names.delete(me);
+  return [...names.values()];
+}
+
+/* ─────────────────────────── 6. START-UP ─────────────────────────── */
+function boot(){
+  const url = String(SUPABASE_URL || '').trim(), key = String(SUPABASE_KEY || '').trim();
+  if (url || key){
+    // https:// for a hosted project; http://localhost or 127.0.0.1 for a local Supabase during development
+    if (!/^(https:\/\/[^\s/]+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)(\/|$)/.test(url) || !key){
+      state.fatal = 'The scoreboard settings are incomplete. SUPABASE_URL must be the project address starting with https:// and SUPABASE_KEY its publishable key.';
+      render(); return;
+    }
+    state.backend = supabaseBackend(url, key);
+  } else state.backend = localBackend();
+  const name = store.get(K.name);
+  if (name) state.player = { name, key: slug(name) };
+  window.addEventListener('hashchange', enterRoom);
+  enterRoom();
+}
+function enterRoom(){
+  if (state.feed){ state.feed.stop(); state.feed = null; }
+  Object.assign(state, { duels: [], results: [], sig: '', created: [], loaded: false, slow: false, error: null, shown: null });
+  if (isDemo()) state.room = 'demo';
+  else {
+    const id = location.hash.replace(/^#/, '');
+    state.room = /^[a-z0-9]{16,40}$/.test(id) ? id : null;
+  }
+  if (!state.room){ state.screen = 'landing'; render(); return; }
+  if (!isDemo()) store.set(K.room, state.room);
+  syncLocal();
+  state.screen = state.player ? 'lobby' : 'name';
+  const room = state.room;
+  setTimeout(() => { if (state.room === room && !state.loaded && !state.error){ state.slow = true; refresh(); } }, 10000);
+  state.feed = state.backend.subscribe(room, {
+    onData(duels, results){
+      const d = duels.map(cleanDuel), r = results.map(cleanResult);
+      for (const extra of state.created) if (!d.some(x => x.id === extra.id)) d.push(extra);
+      const sig = JSON.stringify([d, r]);
+      const changed = sig !== state.sig || !state.loaded || state.slow || !!state.error;
+      Object.assign(state, { duels: d, results: r, sig, loaded: true, slow: false, error: null });
+      housekeeping();
+      if (changed) refresh();             // redraw only when something changed
+    },
+    onError(err){
+      const e = err && err.code ? err : { code: 'unknown' };
+      const changed = !state.error || state.error.code !== e.code;
+      state.error = e;
+      if (changed) refresh();
+    },
+    isActive: () => state.screen !== 'play',   // no network traffic while a duel is being played
+  });
+  render();
+}
+function setPlayer(name){
+  state.player = { name, key: slug(name) };
+  store.set(K.name, name);
+  syncLocal();
+  state.screen = 'lobby';
+  housekeeping(); render();
+}
+// Finish what an earlier visit left behind: re-send unsaved results, close duels that ran out of time.
+function housekeeping(){
+  if (!state.player || state.screen === 'play' || !state.loaded) return;
+  const me = state.player;
+  let dirty = false;
+  for (const duel of state.duels){
+    const id = duel.id + '_' + me.key;
+    const stored = state.results.find(r => r.id === id);
+    if (stored && isDone(stored)){
+      if (state.local.final[duel.id] || state.local.prog[duel.id]){ delete state.local.final[duel.id]; delete state.local.prog[duel.id]; dirty = true; }
+      continue;
+    }
+    if (state.local.final[duel.id]){
+      if (!state.sent.has(duel.id) && !state.refused.has(duel.id)) resend(duel.id).catch(() => {});
+      continue;
+    }
+    const prog = state.local.prog[duel.id];
+    const startedAt = (prog && prog.startedAt) || (stored && stored.startedAt) || 0;
+    if (startedAt && Date.now() - startedAt > TIME_LIMIT_MS){
+      state.local.final[duel.id] = { id, duelId: duel.id, key: me.key, name: me.name, startedAt,
+        finishedAt: startedAt + TIME_LIMIT_MS, mistakes: prog ? prog.mistakes : 0, splits: prog ? prog.splits : [], dnf: true };
+      delete state.local.prog[duel.id]; dirty = true;
+      resend(duel.id).catch(() => {});
+    }
+  }
+  if (dirty) saveLocal();
+}
+// Sends a finished result. The browser's copy is only dropped once the scoreboard lists it (see housekeeping),
+// so a result is never lost to a dropped connection or a closed tab.
+function resend(duelId){
+  const final = state.local.final[duelId];
+  if (!final) return Promise.resolve();
+  if (state.saving.has(final.id)) return state.saving.get(final.id);
+  const job = state.backend.saveResult(state.room, final)
+    .then(() => { state.sent.add(duelId); state.refused.delete(duelId); if (state.feed) state.feed.now(); },
+          e => { if (e && e.code === 'rejected') state.refused.add(duelId); throw e; })
+    .finally(() => state.saving.delete(final.id));
+  state.saving.set(final.id, job);
+  return job;
+}
+const isUnsaved = duelId => !!state.local.final[duelId] && !state.sent.has(duelId);
+
+/* ─────────────────────────── 7. SCREENS ─────────────────────────── */
+function render(){
+  if (state.screen === 'play') return;          // the play screen draws itself
+  $app.replaceChildren(view());
+}
+// Called when stored data changes: never rebuild a screen the player is typing or playing in.
+function refresh(){
+  if (state.screen === 'play') return;
+  if (state.screen === 'name'){
+    const box = document.getElementById('known'), note = document.getElementById('name-status');
+    if (box) box.replaceChildren(...knownPlayers());
+    if (note) note.replaceChildren(...(state.error ? [errorNote()] : []));
+    return;
+  }
+  render();
+}
+function view(){
+  if (state.fatal) return h('div', { class:'shell' }, h('div', { class:'panel narrow' },
+    h('h1', { text:'Symbol Duel' }), h('p', { text: state.fatal }),
+    h('button', { class:'btn primary', type:'button', onclick: () => location.reload() }, 'Try again')));
+  switch (state.screen){
+    case 'landing': return landingView();
+    case 'name': return nameView();
+    case 'lobby': return lobbyView();
+    case 'result': return resultView();
+    default: return h('div', { class:'shell' }, h('p', { class:'muted', text:'Loading…' }));
+  }
+}
+function logo(){
+  const box = h('span', { 'aria-hidden':'true' });
+  box.innerHTML = '<svg viewBox="0 0 40 40"><circle cx="15" cy="16" r="12" fill="#f0b429" stroke="#1c2230" stroke-width="2.5"/>' +
+    '<circle cx="25" cy="24" r="12" fill="#0e7c6b" fill-opacity=".9" stroke="#1c2230" stroke-width="2.5"/>' +
+    '<circle cx="20" cy="20" r="3.2" fill="#fffdf8" stroke="#1c2230" stroke-width="2"/></svg>';
+  return box.firstChild;
+}
+function topbar(){
+  return h('header', { class:'top' },
+    h('div', { class:'brand' }, logo(), h('span', { text:'Symbol Duel' })),
+    state.player && h('div', null, h('span', { class:'muted', text:'Playing as ' }), h('b', { text: state.player.name }),
+      h('button', { class:'link', type:'button', onclick: () => { state.screen = 'name'; render(); } }, 'change')));
+}
+function details(id, cls, label, ...body){
+  const el = h('details', { class: cls, open: state.open.has(id) }, h('summary', { text: label }), body);
+  el.addEventListener('toggle', () => { if (el.open) state.open.add(id); else state.open.delete(id); });
+  return el;
+}
+function copyButton(label, getText, field){
+  const btn = h('button', { class:'btn', type:'button' }, label);
+  btn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(getText()); btn.textContent = 'Copied'; }
+    catch {   // clipboard not available: select the text so it can be copied by hand
+      if (field && field.select){ field.focus(); field.select(); }
+      else if (field){ const range = document.createRange(); range.selectNodeContents(field); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+      btn.textContent = 'Selected, now copy';
+    }
+    setTimeout(() => { btn.textContent = label; }, 1800);
+  });
+  return btn;
+}
+
+function landingView(){
+  const last = store.get(K.room);
+  return h('div', { class:'shell' }, h('div', { class:'panel narrow' },
+    h('div', { class:'brand', style:'margin-bottom:14px' }, logo(), h('span', { text:'Symbol Duel' })),
+    h('p', { text:'Create a game, then send its invite link to your opponent. Everyone who opens that link shares one scoreboard.' }),
+    h('div', { class:'row' },
+      h('button', { class:'btn primary big', type:'button', onclick: () => { location.hash = randomId(20); } }, 'Create a new game'),
+      last && h('button', { class:'btn', type:'button', onclick: () => { location.hash = last; } }, 'Continue my last game')),
+    h('p', { class:'muted small', style:'margin:14px 0 0', text:'Invited by someone? Open the link they sent you instead.' })));
+}
+
+function knownPlayers(){
+  const names = otherPlayers();
+  if (state.player) names.unshift(state.player.name);
+  const unique = [...new Map(names.map(n => [slug(n), n])).values()];
+  if (!unique.length) return [];
+  return [h('p', { class:'muted small', style:'margin-bottom:6px', text:'Already in this game (tap your name to continue as that player):' }),
+    h('div', { class:'row', style:'margin-bottom:14px' }, unique.map(n => h('button', { class:'btn', type:'button',
+      onclick: () => { const f = document.getElementById('name'); f.value = n; f.focus(); } }, n)))];
+}
+function nameView(){
+  const input = h('input', { class:'field', id:'name', type:'text', maxlength:'24', placeholder:'Your name',
+    autocomplete:'nickname', 'aria-label':'Your name', value: state.player ? state.player.name : '' });
+  const form = h('form', { class:'panel narrow' },
+    h('h1', { text:'Who is playing?' }),
+    h('p', { class:'muted', text:'The scoreboard recognises you by this name, so type it the same way on every device.' }),
+    input, h('div', { id:'known' }, knownPlayers()),
+    h('div', { class:'row' }, h('button', { class:'btn primary big', type:'submit' }, 'Continue'),
+      state.player && h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Cancel')));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = input.value.trim().replace(/\s+/g, ' ').slice(0, 24);
+    if (!name){ input.focus(); return; }
+    setPlayer(name);
+  });
+  return h('div', { class:'shell' }, h('div', { id:'name-status', class:'narrow', style:'margin-top:4vh' }, state.error && errorNote()),
+    h('div', { style: state.error ? '' : 'margin-top:-4vh' }, form));
+}
+
+function setupGuide(){
+  const sql = h('pre', { id:'setup-sql', tabindex:'0', text: SETUP_SQL });
+  return h('div', { class:'note' },
+    h('b', { text:'Demo mode. ' }),
+    'Scores stay in this browser only. To try a full duel on your own, play one, tap “change” next to your name, and play it again as a second player.',
+    details('setup', '', 'Set up the shared scoreboard with Supabase (about 10 minutes, free)',
+      h('ol', null,
+        h('li', null, 'In the Supabase dashboard create a new project on the free plan, or use one you already have: everything the setup creates is named ',
+          h('code', { text:'symbol_…' }), '. Leave the Data API switched on, using the ', h('code', { text:'public' }), ' schema (the default).'),
+        h('li', null, 'Open the ', h('b', { text:'SQL Editor' }), ', start a new query, paste the setup script below and click ', h('b', { text:'Run' }),
+          '. It should end with “Success. No rows returned”.', sql, copyButton('Copy setup script', () => SETUP_SQL, sql)),
+        h('li', null, 'Click ', h('b', { text:'Connect' }), ' at the top of the project and copy the project URL and the publishable key (it starts with ',
+          h('code', { text:'sb_publishable_' }), '). The key is also under ', h('b', { text:'Settings → API Keys' }), '. Never use the secret key here.'),
+        h('li', null, 'Open this file in a text editor. Near the top of the script, paste them between the quotes of ',
+          h('code', { text:"const SUPABASE_URL = '';" }), ' and ', h('code', { text:"const SUPABASE_KEY = '';" }), '.'),
+        h('li', null, 'Put the file online. The quickest way is Netlify Drop: rename the file to ', h('code', { text:'index.html' }),
+          ', put it alone in a folder, drag the folder onto app.netlify.com/drop, then sign in or sign up to claim the site (unclaimed sites are password-protected and deleted after an hour). Any other static web host works too.'),
+        h('li', null, 'Open the address, create a game and send the invite link to your opponent.')),
+      h('p', { class:'muted small', style:'margin:8px 0 0', text:'Free Supabase projects pause after about a week with too little activity. If that happens, resume the project in the Supabase dashboard. The scores are kept.' })));
+}
+const ERROR_HINTS = {
+  'paused': 'The Supabase project is paused because nobody played for about a week. Its owner can resume it in the Supabase dashboard; the scores are kept.',
+  'not-set-up': 'The scoreboard is not set up yet. Run the setup script from the guide in the Supabase SQL Editor.',
+  'permission-denied': 'The scoreboard refused the request. Check that SUPABASE_KEY is the project’s publishable key and that the setup script ran without errors.',
+  'restricted': 'Supabase has restricted this project, usually because a free-plan limit was reached. Its owner can check the Supabase dashboard.',
+};
+function errorNote(){
+  const e = state.error || {}, code = String(e.code || 'unknown');
+  const hint = ERROR_HINTS[code]
+    || (code === 'rejected' ? 'The scoreboard refused a change: ' + String(e.message || '').slice(0, 200)
+    : 'The shared scoreboard cannot be reached right now, so what you see may be out of date. If nobody has played for about a week, the free Supabase project may be paused: its owner can resume it in the Supabase dashboard.');
+  return h('div', { class:'note warn', role:'status' }, h('b', { text:'Scoreboard problem. ' }), hint, h('span', { class:'muted small', text:` (${code})` }));
+}
+
+function resultChips(row){
+  const me = state.player.key;
+  return h('div', { class:'chips wide' }, row.done.map(r => h('span', { class:'chip' + (row.winners.includes(r.key) ? ' win' : '') },
+    h('span', { text: r.key === me ? 'You' : r.name }), h('span', { class:'time', text: r.dnf ? 'out of time' : fmt(r.timeMs) }),
+    row.winners.includes(r.key) && h('span', { text: row.winners.length > 1 ? 'tie' : '🏆' }))));
+}
+function roundsTable(row){
+  const me = state.player.key, players = row.done;
+  const cell = (r, i) => {
+    const v = r.splits[i];
+    const fastest = Number.isFinite(v) && players.every(o => !Number.isFinite(o.splits[i]) || o.splits[i] >= v);
+    return h('td', { class: fastest && players.length > 1 ? 'best' : '', text: Number.isFinite(v) ? (v / 1000).toFixed(2) : '—' });
+  };
+  return h('table', null,
+    h('thead', null, h('tr', null, h('th', { text:'Pair' }), players.map(r => h('th', { text: r.key === me ? 'You' : r.name })))),
+    h('tbody', null,
+      Array.from({ length: PAIRS }, (_, i) => h('tr', null, h('td', { text: String(i + 1) }), players.map(r => cell(r, i)))),
+      h('tr', null, h('td', { text:'Wrong taps' }), players.map(r => h('td', { text: r.mistakes ? `${r.mistakes} (+${r.mistakes * PENALTY_MS / 1000} s)` : '0' }))),
+      h('tr', null, h('td', { text:'Total' }), players.map(r => h('td', { class:'time', text: r.dnf ? 'out of time' : fmt(r.timeMs) })))));
+}
+function duelItem(row){
+  const d = row.duel, me = state.player.key;
+  const by = d.createdBy ? (slug(d.createdBy) === me ? 'Started by you' : 'Started by ' + d.createdBy) + ' · ' : '';
+  const head = h('div', null, h('div', { class:'t', text:`Duel #${row.no}` }), h('div', { class:'muted small', text: by + fmtWhen(d.createdAt) }));
+  if (row.status === 'todo' || row.status === 'playing'){
+    const names = row.othersDone.map(r => r.name);
+    const line = row.status === 'playing' ? 'In progress. The clock is still running.'
+      : names.length ? `${listNames(names)} already played. Their time stays hidden until you finish.` : 'Nobody has played it yet.';
+    return h('li', { class:'duel mine' }, head,
+      h('button', { class:'btn primary', type:'button', onclick: () => openDuel(d.id) }, row.status === 'playing' ? 'Resume' : 'Play'),
+      h('div', { class:'small wide', text: line }));
+  }
+  if (row.status === 'waiting'){
+    return h('li', { class:'duel' }, head, h('span', { class:'time', text: row.mine.dnf ? 'out of time' : fmt(row.mine.timeMs) }),
+      h('div', { class:'muted small wide', text: isUnsaved(d.id)
+        ? 'Not saved to the scoreboard yet. It is sent again when the connection is back.' : 'Waiting for your opponent to play it.' }));
+  }
+  const won = row.winners.includes(me);
+  return h('li', { class:'duel' }, head,
+    h('span', { class:'small', style:'font-weight:800', text: won ? (row.winners.length > 1 ? 'Tie' : 'You won') : 'You lost' }),
+    resultChips(row), h('div', { class:'wide' }, details('rounds:' + d.id, 'rounds', 'Pair by pair', roundsTable(row))));
+}
+function boardPanel(board){
+  const me = state.player.key, ties = board.some(p => p.ties);
+  return h('section', { class:'panel' }, h('h2', { text:'Scoreboard' }),
+    board.length ? h('table', null,
+      h('thead', null, h('tr', null, h('th', { text:'Player' }), h('th', { text:'Won' }), h('th', { text:'Lost' }), ties && h('th', { text:'Tied' }), h('th', { text:'Average' }), h('th', { text:'Best' }))),
+      h('tbody', null, board.map(p => h('tr', null,
+        h('td', null, h('b', { text: p.name }), p.key === me && h('span', { class:'you', text:'you' })),
+        h('td', { text: String(p.wins) }), h('td', { text: String(p.losses) }), ties && h('td', { text: String(p.ties) }),
+        h('td', { text: p.n ? fmt(p.sum / p.n) : '—' }), h('td', { text: fmt(p.best) })))))
+    : h('p', { class:'muted', style:'margin:0', text:'No finished duels yet. A duel counts once two players have played it.' }));
+}
+function lobbyView(){
+  const rows = summarize(), board = leaderboard(rows);
+  const mine = rows.filter(r => r.status === 'todo' || r.status === 'playing').reverse();
+  const waiting = rows.filter(r => r.status === 'waiting').reverse();
+  const done = rows.filter(r => r.status === 'done').reverse();
+  const title = !state.loaded ? 'Symbol Duel' : mine.length === 1 ? 'One duel is waiting for you'
+    : mine.length ? `${mine.length} duels are waiting for you` : 'Challenge your opponent';
+  const newBtn = h('button', { class:'btn primary big', type:'button', disabled: !state.loaded }, 'New duel');
+  newBtn.addEventListener('click', () => newDuel(newBtn));
+  const section = (label, list, empty) => h('section', { class:'panel' }, h('h2', { text: label }),
+    list.length ? h('ul', { class:'list' }, list.map(duelItem)) : h('p', { class:'muted', style:'margin:0', text: empty }));
+  const link = h('input', { class:'field', type:'text', readonly: true, value: location.href, 'aria-label':'Invite link' });
+
+  return h('div', { class:'shell' }, topbar(),
+    isDemo() && setupGuide(),
+    state.error && errorNote(),
+    h('section', { class:'panel hero' },
+      h('div', null, h('h1', { text: title }),
+        h('p', { class:'muted', text:`Ten pairs of cards. Find the one symbol each pair shares, as fast as you can. Your opponent gets exactly the same cards, whenever they have time.` })),
+      newBtn),
+    !state.loaded
+      ? h('p', { class:'muted', style:'margin-top:18px', text: state.slow ? 'Still trying to reach the scoreboard…' : 'Loading duels…' })
+      : h('div', { class:'grid' },
+          h('div', null,
+            section('Your turn', mine, 'Nothing is waiting for you. Start a new duel.'),
+            waiting.length ? section('Waiting for your opponent', waiting, '') : null,
+            section('Finished', done.slice(0, 20), 'Finished duels show up here with both times.')),
+          h('div', null,
+            boardPanel(board),
+            !isDemo() && h('section', { class:'panel' }, h('h2', { text:'Invite link' }),
+              h('p', { class:'muted small', text:'Send this once. Anyone who opens it joins this game and its scoreboard.' }),
+              h('div', { class:'invite' }, link, copyButton('Copy', () => location.href, link))),
+            h('section', { class:'panel' }, h('h2', { text:'How a duel works' }),
+              h('ul', { class:'plain small' },
+                h('li', { text:'Either player can start a duel at any time.' }),
+                h('li', { text:'The other finds it under “Your turn” next time they open the game.' }),
+                h('li', { text:`Fastest total time wins. Every wrong tap adds ${PENALTY_MS / 1000} seconds.` }),
+                h('li', { text:'The clock cannot be paused once you start.' }))))));
+}
+async function newDuel(btn){
+  btn.disabled = true;
+  const duel = { id: randomId(12), seed: Math.floor(Math.random() * 2147483647), createdAt: Date.now(), createdBy: state.player.name };
+  try {
+    await state.backend.createDuel(state.room, duel);
+    state.created.push(cleanDuel(duel));
+    if (!state.duels.some(d => d.id === duel.id)) state.duels = [...state.duels, cleanDuel(duel)];
+    openDuel(duel.id);
+  } catch (e){
+    btn.disabled = false;
+    state.error = e && e.code ? e : { code:'unknown' };
+    render();
+  }
+}
+
+function resultView(){
+  const shown = state.shown, me = state.player.key;
+  const row = shown && summarize().find(r => r.duel.id === shown.duelId);
+  if (!row || !row.mine || !isDone(row.mine)){ state.screen = 'lobby'; return lobbyView(); }
+  const mine = row.mine, others = otherPlayers(), unsaved = isUnsaved(row.duel.id);
+  const winner = row.done.find(r => row.winners.includes(r.key));
+  const headline = mine.dnf ? 'Out of time'
+    : !row.othersDone.length ? 'Done!'
+    : row.winners.includes(me) ? (row.winners.length > 1 ? 'It’s a tie!' : 'You win!')
+    : winner ? `${winner.name} wins this one` : 'Done!';
+  const again = h('button', { class:'btn primary', type:'button' }, 'New duel');
+  again.addEventListener('click', () => newDuel(again));
+  const retry = h('button', { class:'link', type:'button' }, 'Try again');
+  retry.addEventListener('click', () => {
+    state.refused.delete(row.duel.id);
+    shown.failed = false; shown.saving = true; render();
+    resend(row.duel.id).then(() => { shown.saving = false; }, () => { shown.saving = false; shown.failed = true; })
+      .then(() => { if (state.screen === 'result' && state.shown === shown) render(); });
+  });
+  return h('div', { class:'shell' }, topbar(),
+    h('section', { class:'panel result' },
+      h('div', { class:'muted', text:`Duel #${row.no}` }),
+      h('h1', { text: headline }),
+      !mine.dnf && h('div', { class:'bigtime', text: fmt(mine.timeMs) }),
+      h('p', { class:'muted', text: mine.dnf ? 'This duel was not finished within 10 minutes.'
+        : mine.mistakes ? `${mine.mistakes} wrong ${mine.mistakes === 1 ? 'tap' : 'taps'}, ${mine.mistakes * PENALTY_MS / 1000} seconds of penalty included.` : 'No wrong taps.' }),
+      unsaved && shown.failed && h('p', { style:'color:var(--warn)' }, 'Your result is not saved to the scoreboard yet.', retry),
+      unsaved && shown.saving && h('p', { class:'muted small', text:'Saving your result…' }),
+      row.othersDone.length
+        ? h('div', { style:'text-align:left;margin-top:14px' }, roundsTable(row))
+        : h('p', { text: `${others.length ? listNames(others) : 'Your opponent'} will find this duel waiting next time they open the game. Your time stays hidden from them until they have played.` }),
+      h('div', { class:'row' }, h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Back to all duels'), again)));
+}
+
+/* ─────────────────────────── 8. PLAYING A DUEL ─────────────────────────── */
+function openDuel(id){
+  const duel = state.duels.find(d => d.id === id);
+  if (!duel || !state.player) return;
+  const me = state.player, resultId = duel.id + '_' + me.key;
+  const stored = state.results.find(r => r.id === resultId);
+  if ((stored && isDone(stored)) || state.local.final[duel.id]){ state.screen = 'lobby'; render(); return; }
+  const no = summarize().find(r => r.duel.id === id).no;
+  const cards = buildDuel(duel.seed);
+  const saved = state.local.prog[duel.id] || null;
+  const p = {
+    idx: saved ? Math.min(saved.idx, PAIRS - 1) : 0, mistakes: saved ? saved.mistakes : 0, splits: saved ? saved.splits.slice() : [],
+    startedAt: (saved && saved.startedAt) || (stored && stored.startedAt) || null,
+    locked: true, over: false, raf: 0, lastMiss: 0,
+  };
+  const shown = { a: -1, b: -1 };
+  const start = () => ({ id: resultId, duelId: duel.id, key: me.key, name: me.name, startedAt: p.startedAt });
+  const persist = () => { state.local.prog[duel.id] = { startedAt: p.startedAt, idx: p.idx, mistakes: p.mistakes, splits: p.splits }; saveLocal(); };
+  const warn = e => { e.preventDefault(); e.returnValue = ''; };
+
+  const dots = Array.from({ length: PAIRS }, (_, i) => h('i', { class: i < p.idx ? 'on' : '' }));
+  const clock = h('span', { class:'clock', text:'0.0' });
+  const pen = h('span', { class:'pen', 'aria-hidden':'true', text:`+${PENALTY_MS / 1000} s` });
+  const miss = h('b', { text: String(p.mistakes) });
+  const slotA = h('div', null, h('div', { class:'card blank' })), slotB = h('div', null, h('div', { class:'card blank' }));
+  const overlay = h('div', { class:'overlay' });
+  state.screen = 'play';
+  $app.replaceChildren(h('div', { class:'play' },
+    h('header', { class:'hud' }, h('div', { class:'dots', role:'img', 'aria-label':`Pair progress, ${PAIRS} pairs` }, dots),
+      h('div', { class:'clockwrap' }, clock, pen), h('div', { class:'miss' }, 'Wrong taps', miss)),
+    h('main', { class:'stage' }, slotA, slotB), overlay));
+
+  function cardEl(card){
+    const el = h('div', { class:'card pop' });
+    for (const it of card.items){
+      const [emoji, label] = SYMBOLS[it.id];
+      const btn = h('button', { class:'sym', type:'button', 'aria-label': label, 'data-id': it.id,
+        style:`left:${(50 + it.x * 50).toFixed(2)}%;top:${(50 + it.y * 50).toFixed(2)}%;--s:${it.size.toFixed(3)};--r:${it.rot}deg` },
+        h('span', { 'aria-hidden':'true', text: emoji }));
+      // React on press, not release, so a tap counts the moment the finger lands.
+      btn.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button === 0) pick(it.id, btn); });
+      btn.addEventListener('click', e => { if (e.detail === 0) pick(it.id, btn); });   // keyboard
+      el.append(btn);
+    }
+    return el;
+  }
+  // The card that stays keeps its place; the new card alternates between the two slots.
+  function showPair(){
+    const a = p.idx % 2 === 0 ? p.idx : p.idx + 1, b = p.idx % 2 === 0 ? p.idx + 1 : p.idx;
+    for (const [slot, name, index] of [[slotA, 'a', a], [slotB, 'b', b]]){
+      if (shown[name] !== index){ slot.replaceChildren(cardEl(cards[index])); shown[name] = index; }
+      else slot.querySelectorAll('.sym').forEach(s => s.classList.remove('hit', 'miss'));
+    }
+  }
+  function tick(){
+    if (p.over) return;
+    const elapsed = Date.now() - p.startedAt;
+    if (elapsed > TIME_LIMIT_MS){ finish(p.startedAt + TIME_LIMIT_MS, true); return; }
+    clock.textContent = ((elapsed + p.mistakes * PENALTY_MS) / 1000).toFixed(1);
+    p.raf = requestAnimationFrame(tick);
+  }
+  function pick(id, btn){
+    if (p.locked || p.over) return;
+    const now = Date.now();
+    const common = cards[shown.a].ids.find(x => cards[shown.b].ids.includes(x));
+    if (id === common){
+      p.locked = true;
+      p.splits.push(now - p.startedAt - p.splits.reduce((sum, v) => sum + v, 0));
+      $app.querySelectorAll(`.sym[data-id="${id}"]`).forEach(s => s.classList.add('hit'));
+      dots[p.idx].classList.add('on');
+      if (p.idx === PAIRS - 1){ finish(now, false); return; }
+      p.idx++; persist();
+      setTimeout(() => { if (!p.over){ showPair(); p.locked = false; } }, 380);
+    } else {
+      if (now - p.lastMiss < 250) return;       // ignore an accidental double tap
+      p.lastMiss = now; p.mistakes++; persist();
+      miss.textContent = String(p.mistakes);
+      for (const el of [btn, pen]){ el.classList.remove('miss', 'go'); void el.offsetWidth; }
+      btn.classList.add('miss'); pen.classList.add('go');
+    }
+  }
+  function finish(now, dnf){
+    p.over = true; p.locked = true;
+    cancelAnimationFrame(p.raf);
+    window.removeEventListener('beforeunload', warn);
+    const result = { ...start(), finishedAt: now, mistakes: p.mistakes, splits: p.splits.slice() };
+    if (dnf) result.dnf = true; else result.timeMs = now - p.startedAt + p.mistakes * PENALTY_MS;
+    if (!dnf) clock.textContent = (result.timeMs / 1000).toFixed(2);
+    delete state.local.prog[duel.id]; state.local.final[duel.id] = result; saveLocal();
+    const token = state.shown = { duelId: duel.id, saving: true, failed: false };
+    resend(duel.id).then(() => { token.saving = false; }, () => { token.saving = false; token.failed = true; })
+      .then(() => { if (state.screen === 'result' && state.shown === token) render(); });
+    setTimeout(() => { state.screen = 'result'; housekeeping(); render(); }, dnf ? 0 : 800);
+  }
+  function go(){
+    overlay.hidden = true;
+    if (p.startedAt == null){
+      p.startedAt = Date.now(); persist();
+      state.backend.saveResult(state.room, start()).catch(() => {});   // tells the scoreboard the clock is running
+    }
+    window.addEventListener('beforeunload', warn);
+    showPair(); p.locked = false; tick();
+  }
+  function countdown(){
+    let n = 3;
+    const show = () => overlay.replaceChildren(h('div', { class:'count', text: String(n) }));
+    show();
+    const timer = setInterval(() => { n--; if (n > 0) show(); else { clearInterval(timer); go(); } }, 700);
+  }
+  const resume = p.startedAt != null;
+  overlay.append(h('div', { class:'panel intro' },
+    h('h2', { text: resume ? `Duel #${no} is already running` : `Duel #${no}` }),
+    resume ? h('p', { text:'You started it earlier and the clock never stopped. Jump back in.' })
+      : h('ul', { class:'plain' },
+          h('li', { text:`${PAIRS} pairs of cards. Each pair shares exactly one symbol.` }),
+          h('li', { text:'Tap that symbol on either card.' }),
+          h('li', { text:`A wrong tap adds ${PENALTY_MS / 1000} seconds.` }),
+          h('li', { text:'Once you start, the clock cannot be paused.' })),
+    h('div', { class:'row end', style:'margin-top:14px' },
+      h('button', { class:'btn', type:'button', onclick: () => { state.screen = 'lobby'; render(); } }, 'Back'),
+      h('button', { class:'btn primary big', type:'button', onclick: resume ? go : countdown }, resume ? 'Continue' : 'Start'))));
+}
+
+boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snug Spot — Results</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&amp;family=Nunito:wght@400..800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 24px 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; background-color: #1F3B31; background-image: radial-gradient(rgba(255, 240, 215, 0.045) 1px, transparent 1.4px); background-size: 7px 7px; font-family: Nunito, system-ui, sans-serif; color: #FBF1DE">
+
+  <span style="margin-top: 14px; text-align: center; font-weight: 800; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: #B9CCBF">The pile is empty · Room MOSS</span>
+
+  <div aria-hidden="true" style="position: relative; height: 204px; margin-top: 14px">
+    <div style="position: absolute; left: 48px; top: 30px; width: 150px; height: 150px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 5px 0 #D8C29C, 0 14px 24px rgba(8, 20, 15, 0.45); transform: rotate(-16deg)">
+      <div style="position: absolute; inset: 7px; border: 2px dashed #E8D6B4; border-radius: 50%"></div>
+      <img src="../../assets/symbols/leaf.svg" alt="" style="position: absolute; left: 28px; top: 34px; width: 44px; height: 44px; transform: rotate(-20deg)">
+      <img src="../../assets/symbols/moon.svg" alt="" style="position: absolute; left: 44px; top: 84px; width: 40px; height: 40px">
+    </div>
+    <div style="position: absolute; left: 144px; top: 30px; width: 150px; height: 150px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 5px 0 #D8C29C, 0 14px 24px rgba(8, 20, 15, 0.45); transform: rotate(14deg)">
+      <div style="position: absolute; inset: 7px; border: 2px dashed #E8D6B4; border-radius: 50%"></div>
+      <img src="../../assets/symbols/candle.svg" alt="" style="position: absolute; left: 80px; top: 30px; width: 42px; height: 42px; transform: rotate(10deg)">
+      <img src="../../assets/symbols/key.svg" alt="" style="position: absolute; left: 76px; top: 82px; width: 42px; height: 42px">
+    </div>
+    <div style="position: absolute; left: 96px; top: 44px; width: 150px; height: 150px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 5px 0 #D8C29C, 0 14px 24px rgba(8, 20, 15, 0.45); transform: rotate(-3deg)">
+      <div style="position: absolute; inset: 7px; border: 2px dashed #E8D6B4; border-radius: 50%"></div>
+      <img src="../../assets/symbols/star.svg" alt="" style="position: absolute; left: 51px; top: 18px; width: 48px; height: 48px; transform: rotate(-8deg)">
+      <img src="../../assets/symbols/heart.svg" alt="" style="position: absolute; left: 24px; top: 70px; width: 44px; height: 44px; transform: rotate(-16deg)">
+      <img src="../../assets/symbols/daisy.svg" alt="" style="position: absolute; left: 80px; top: 72px; width: 46px; height: 46px; transform: rotate(12deg)">
+    </div>
+    <sc-if value="{{notTie}}" hint-placeholder-val="{{ true }}">
+      <span style="position: absolute; left: 218px; top: 136px; width: 66px; height: 66px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 4px {{winRing}}, 0 8px 16px rgba(8, 20, 15, 0.4); display: flex; align-items: center; justify-content: center; transform: rotate(8deg)">
+        <img src="{{winSrc}}" alt="" style="width: 46px; height: 46px">
+      </span>
+    </sc-if>
+    <sc-if value="{{tie}}" hint-placeholder-val="{{ false }}">
+      <span style="position: absolute; left: 64px; top: 136px; width: 60px; height: 60px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 4px #F2B54A, 0 8px 16px rgba(8, 20, 15, 0.4); display: flex; align-items: center; justify-content: center; transform: rotate(-8deg)">
+        <img src="../../assets/symbols/mug.svg" alt="" style="width: 42px; height: 42px">
+      </span>
+      <span style="position: absolute; left: 222px; top: 136px; width: 60px; height: 60px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 4px #F09A84, 0 8px 16px rgba(8, 20, 15, 0.4); display: flex; align-items: center; justify-content: center; transform: rotate(8deg)">
+        <img src="../../assets/symbols/robin.svg" alt="" style="width: 42px; height: 42px">
+      </span>
+    </sc-if>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px; text-align: center">
+    <h1 style="margin: 0; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 46px; line-height: 1.05; color: #FBF1DE">{{headline}}</h1>
+    <p style="margin: 0; font-size: 17px; line-height: 1.45; color: #C9D8CD">{{subline}}</p>
+  </div>
+
+  <div style="margin-top: 22px; padding: 16px; border-radius: 22px; background: #2A4A3E; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span style="width: 40px; height: 40px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <img src="../../assets/symbols/mug.svg" alt="" style="width: 28px; height: 28px">
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 0">
+        <span style="display: flex; align-items: center; gap: 8px; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 17px">
+          You
+          <sc-if value="{{youWon}}" hint-placeholder-val="{{ true }}">
+            <span style="height: 22px; padding: 0 8px; border-radius: 11px; background: #F2B54A; color: #2A1D14; font-family: Nunito, sans-serif; font-weight: 800; font-size: 11px; line-height: 22px; letter-spacing: 0.5px; text-transform: uppercase">Winner</span>
+          </sc-if>
+        </span>
+        <span style="height: 10px; border-radius: 5px; background: #1F3B31; overflow: hidden">
+          <span style="display: block; height: 10px; width: {{youPct}}%; border-radius: 5px; background: #F2B54A"></span>
+        </span>
+      </span>
+      <span style="width: 44px; text-align: right; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 26px; color: #F2B54A">{{you}}</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span style="width: 40px; height: 40px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F09A84; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <img src="../../assets/symbols/robin.svg" alt="" style="width: 28px; height: 28px">
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; min-width: 0">
+        <span style="display: flex; align-items: center; gap: 8px; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 17px">
+          {{oppName}}
+          <sc-if value="{{oppWon}}" hint-placeholder-val="{{ false }}">
+            <span style="height: 22px; padding: 0 8px; border-radius: 11px; background: #F09A84; color: #2A1D14; font-family: Nunito, sans-serif; font-weight: 800; font-size: 11px; line-height: 22px; letter-spacing: 0.5px; text-transform: uppercase">Winner</span>
+          </sc-if>
+        </span>
+        <span style="height: 10px; border-radius: 5px; background: #1F3B31; overflow: hidden">
+          <span style="display: block; height: 10px; width: {{oppPct}}%; border-radius: 5px; background: #F09A84"></span>
+        </span>
+      </span>
+      <span style="width: 44px; text-align: right; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 26px; color: #F09A84">{{opp}}</span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px">
+    <div style="padding: 14px 16px; border-radius: 18px; border: 2px solid #3E6152; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-weight: 800; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #B9CCBF">Fastest spot</span>
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 26px; color: #FBF1DE">{{bestTime}}</span>
+    </div>
+    <div style="padding: 14px 16px; border-radius: 18px; border: 2px solid #3E6152; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-weight: 800; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #B9CCBF">Best streak</span>
+      <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 26px; color: #FBF1DE">{{streakText}}</span>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto">
+    <sc-if value="{{hasRematch}}" hint-placeholder-val="{{ false }}">
+      <button type="button" onClick="{{rematch}}" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; height: 58px; border-radius: 18px; border: 0; background: #F2B54A; color: #2A1D14; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 20px; box-shadow: 0 4px 0 #B9822A; cursor: pointer">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg>
+        Rematch
+      </button>
+    </sc-if>
+    <sc-if value="{{noRematch}}" hint-placeholder-val="{{ true }}">
+      <a href="Game.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 58px; border-radius: 18px; background: #F2B54A; color: #2A1D14; text-decoration: none; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 20px; box-shadow: 0 4px 0 #B9822A">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 4v7h-7"></path></svg>
+        Rematch
+      </a>
+    </sc-if>
+    <a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 18px; border: 2px solid #5E8172; box-sizing: border-box; color: #FBF1DE; text-decoration: none; font-family: Fredoka, sans-serif; font-weight: 500; font-size: 18px">Leave the table</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"youScore":{"editor":"int","min":0,"max":40,"default":7,"section":"Preview"},"oppScore":{"editor":"int","min":0,"max":40,"default":5,"section":"Preview"},"bestTime":{"editor":null},"bestStreak":{"editor":null},"oppName":{"editor":null},"onRematch":{"editor":null},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const you = Number(this.props.youScore ?? 7);
+    const opp = Number(this.props.oppScore ?? 5);
+    const oppName = this.props.oppName ?? 'Ema';
+    const streak = Number(this.props.bestStreak ?? 3);
+    const cards = (n) => n + (n === 1 ? ' card' : ' cards');
+    const max = Math.max(you, opp, 1);
+    const youWon = you > opp;
+    const oppWon = opp > you;
+    const tie = you === opp;
+    let headline = 'A perfect tie!';
+    let subline = cards(you) + ' each. Two cocoas, then.';
+    if (youWon) {
+      headline = 'You win!';
+      subline = cards(you) + ' to ' + opp + '. ' + oppName + ' owes you a cocoa.';
+    } else if (oppWon) {
+      headline = oppName + ' wins!';
+      subline = cards(opp) + ' to ' + you + '. You owe ' + oppName + ' a cocoa.';
+    }
+    const onRematch = this.props.onRematch;
+    const hasRematch = typeof onRematch === 'function';
+    return {
+      you: you,
+      opp: opp,
+      oppName: oppName,
+      youPct: Math.round(you / max * 100),
+      oppPct: Math.round(opp / max * 100),
+      youWon: youWon,
+      oppWon: oppWon,
+      tie: tie,
+      notTie: !tie,
+      winSrc: oppWon ? '../../assets/symbols/robin.svg' : '../../assets/symbols/mug.svg',
+      winRing: oppWon ? '#F09A84' : '#F2B54A',
+      headline: headline,
+      subline: subline,
+      bestTime: this.props.bestTime ?? '1.6 s',
+      streakText: streak + ' in a row',
+      hasRematch: hasRematch,
+      noRematch: !hasRematch,
+      rematch: () => { if (hasRematch) onRematch(); }
+    };
+  }
+}
+</script>
+</body>
+</html>

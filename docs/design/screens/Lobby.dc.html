@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snug Spot — Room lobby</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&amp;family=Nunito:wght@400..800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F2B54A}a:hover{color:#F7C96F}
+.felt{background-color:#1F3B31;background-image:radial-gradient(rgba(255,240,215,0.045) 1px, transparent 1.4px);background-size:7px 7px}
+.press{transition:transform 120ms ease, box-shadow 120ms ease}
+.press:active{transform:translateY(3px)}
+a:focus-visible,button:focus-visible{outline:3px solid #F2B54A;outline-offset:3px}
+@keyframes waitdot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.wd{animation:waitdot 1.2s infinite ease-in-out}
+.wd2{animation-delay:.2s}.wd3{animation-delay:.4s}
+</style>
+</helmet>
+<div class="felt" style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px 24px 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; font-family: Nunito, system-ui, sans-serif; color: #FBF1DE">
+
+  <div style="display: flex; align-items: center; gap: 12px; height: 48px">
+    <a href="Main.dc.html" aria-label="Leave room" class="press" style="width: 48px; height: 48px; border-radius: 50%; background: #2A4A3E; color: #FBF1DE; display: flex; align-items: center; justify-content: center; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 24px; color: #FBF1DE">Your room</h1>
+  </div>
+
+  <div style="margin-top: 22px; padding: 20px; border-radius: 24px; background: #2A4A3E; display: flex; flex-direction: column; gap: 14px">
+    <span style="font-weight: 800; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: #B9CCBF">Room code</span>
+    <div aria-label="Room code MOSS" style="display: flex; gap: 10px; justify-content: center">
+      <span style="width: 62px; height: 72px; border-radius: 16px; background: #FFF8EC; color: #2A1D14; display: flex; align-items: center; justify-content: center; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 38px; box-shadow: 0 5px 0 #D8C29C; transform: rotate(-3deg)">M</span>
+      <span style="width: 62px; height: 72px; border-radius: 16px; background: #FFF8EC; color: #2A1D14; display: flex; align-items: center; justify-content: center; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 38px; box-shadow: 0 5px 0 #D8C29C; transform: rotate(2deg)">O</span>
+      <span style="width: 62px; height: 72px; border-radius: 16px; background: #FFF8EC; color: #2A1D14; display: flex; align-items: center; justify-content: center; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 38px; box-shadow: 0 5px 0 #D8C29C; transform: rotate(-1deg)">S</span>
+      <span style="width: 62px; height: 72px; border-radius: 16px; background: #FFF8EC; color: #2A1D14; display: flex; align-items: center; justify-content: center; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 38px; box-shadow: 0 5px 0 #D8C29C; transform: rotate(3deg)">S</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 4px">
+      <button type="button" class="press" onClick="{{copy}}" style="height: 48px; border-radius: 14px; border: 2px solid #5E8172; background: transparent; color: #FBF1DE; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: Nunito, sans-serif; font-weight: 800; font-size: 15px; cursor: pointer">
+        <sc-if value="{{notCopied}}" hint-placeholder-val="{{ true }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="3"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+        </sc-if>
+        <sc-if value="{{copied}}" hint-placeholder-val="{{ false }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </sc-if>
+        {{copyLabel}}
+      </button>
+      <button type="button" class="press" style="height: 48px; border-radius: 14px; border: 2px solid #5E8172; background: transparent; color: #FBF1DE; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: Nunito, sans-serif; font-weight: 800; font-size: 15px; cursor: pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"></path><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"></path></svg>
+        Send invite
+      </button>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px">
+    <span style="font-weight: 800; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: #B9CCBF">At the table</span>
+
+    <div style="height: 68px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; background: #2A4A3E; display: flex; align-items: center; gap: 12px">
+      <span style="width: 46px; height: 46px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F2B54A; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+        <img src="../../assets/symbols/mug.svg" alt="" style="width: 32px; height: 32px">
+      </span>
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 18px">You</span>
+        <span style="font-size: 13px; color: #B9CCBF">Host · Mug token</span>
+      </span>
+      <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(127, 168, 138, 0.2); color: #B5DDBF; font-weight: 800; font-size: 13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        Ready
+      </span>
+    </div>
+
+    <sc-if value="{{friendJoined}}" hint-placeholder-val="{{ true }}">
+      <div style="height: 68px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; background: #2A4A3E; display: flex; align-items: center; gap: 12px">
+        <span style="width: 46px; height: 46px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 0 0 3px #F09A84; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <img src="../../assets/symbols/robin.svg" alt="" style="width: 32px; height: 32px">
+        </span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 18px">Ema</span>
+          <span style="font-size: 13px; color: #B9CCBF">Joined just now · Robin token</span>
+        </span>
+        <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(127, 168, 138, 0.2); color: #B5DDBF; font-weight: 800; font-size: 13px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+          Ready
+        </span>
+      </div>
+    </sc-if>
+    <sc-if value="{{friendWaiting}}" hint-placeholder-val="{{ false }}">
+      <div style="height: 68px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; border: 2px dashed #4B6E60; display: flex; align-items: center; gap: 12px">
+        <span style="width: 46px; height: 46px; border-radius: 50%; border: 2px dashed #5E8172; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0">
+          <span class="wd" style="width: 6px; height: 6px; border-radius: 3px; background: #B9CCBF"></span>
+          <span class="wd wd2" style="width: 6px; height: 6px; border-radius: 3px; background: #B9CCBF"></span>
+          <span class="wd wd3" style="width: 6px; height: 6px; border-radius: 3px; background: #B9CCBF"></span>
+        </span>
+        <span style="display: flex; flex-direction: column">
+          <span style="font-family: Fredoka, sans-serif; font-weight: 500; font-size: 18px; color: #C9D8CD">Saving a seat…</span>
+          <span style="font-size: 13px; color: #B9CCBF">Waiting for your friend to enter the code</span>
+        </span>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 24px">
+    <span id="lenLabel" style="font-weight: 800; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: #B9CCBF">Game length</span>
+    <div role="group" aria-labelledby="lenLabel" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 16px; background: #2A4A3E">
+      <sc-for list="{{lengths}}" as="l" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{l.pressed}}" onClick="{{l.pick}}" style="height: 54px; border-radius: 12px; border: 0; background: {{l.bg}}; color: {{l.fg}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; cursor: pointer; font-family: Nunito, sans-serif">
+          <span style="font-family: Fredoka, sans-serif; font-weight: 600; font-size: 16px">{{l.name}}</span>
+          <span style="font-weight: 700; font-size: 12px">{{l.cards}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px">
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span id="pauseLabel" style="font-weight: 800; font-size: 16px">Pause after a wrong tap</span>
+        <span style="font-size: 13px; color: #B9CCBF">1 second, so guessing doesn't pay</span>
+      </span>
+      <button type="button" role="switch" aria-checked="{{pauseChecked}}" aria-labelledby="pauseLabel" onClick="{{togglePause}}" style="width: 58px; height: 34px; flex-shrink: 0; border-radius: 17px; border: 0; padding: 4px; background: {{pauseTrack}}; display: flex; justify-content: {{pauseAlign}}; cursor: pointer">
+        <span style="width: 26px; height: 26px; border-radius: 50%; background: #FFF8EC; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2)"></span>
+      </button>
+    </div>
+  </div>
+
+  <div style="margin-top: auto">
+    <sc-if value="{{friendJoined}}" hint-placeholder-val="{{ true }}">
+      <a href="Game.dc.html" class="press" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 58px; border-radius: 18px; background: #F2B54A; color: #2A1D14; text-decoration: none; font-family: Fredoka, sans-serif; font-weight: 600; font-size: 20px; box-shadow: 0 4px 0 #B9822A">
+        Deal the cards
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </sc-if>
+    <sc-if value="{{friendWaiting}}" hint-placeholder-val="{{ false }}">
+      <button type="button" disabled style="width: 100%; height: 58px; border-radius: 18px; border: 2px dashed #5E8172; background: transparent; color: #B9CCBF; font-family: Fredoka, sans-serif; font-weight: 500; font-size: 18px">Waiting for a second player</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"friend":{"editor":"enum","options":["Joined","Waiting"],"default":"Joined"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { length: 'quick', pause: true, copied: false };
+  }
+  componentWillUnmount() {
+    clearTimeout(this.copyTimer);
+  }
+  renderVals() {
+    const s = this.state;
+    const joined = (this.props.friend ?? 'Joined') === 'Joined';
+    const opts = [
+      { id: 'quick', name: 'Quick', cards: '12 cards' },
+      { id: 'cozy', name: 'Cozy', cards: '24 cards' },
+      { id: 'long', name: 'Long', cards: '40 cards' }
+    ];
+    const lengths = opts.map((o) => {
+      const on = o.id === s.length;
+      return {
+        name: o.name,
+        cards: o.cards,
+        pressed: on ? 'true' : 'false',
+        bg: on ? '#F2B54A' : 'transparent',
+        fg: on ? '#2A1D14' : '#FBF1DE',
+        pick: () => this.setState({ length: o.id })
+      };
+    });
+    return {
+      friendJoined: joined,
+      friendWaiting: !joined,
+      lengths: lengths,
+      pauseChecked: s.pause ? 'true' : 'false',
+      pauseTrack: s.pause ? '#F2B54A' : '#3E6152',
+      pauseAlign: s.pause ? 'flex-end' : 'flex-start',
+      togglePause: () => this.setState({ pause: !s.pause }),
+      copied: s.copied,
+      notCopied: !s.copied,
+      copyLabel: s.copied ? 'Copied!' : 'Copy code',
+      copy: () => {
+        this.setState({ copied: true });
+        clearTimeout(this.copyTimer);
+        this.copyTimer = setTimeout(() => this.setState({ copied: false }), 1600);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+{
+  "viewBox": "0 0 64 64",
+  "count": 26,
+  "symbols": [
+    {
+      "id": "acorn",
+      "label": "Acorn",
+      "file": "acorn.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "apple",
+      "label": "Apple",
+      "file": "apple.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "bell",
+      "label": "Bell",
+      "file": "bell.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    },
+    {
+      "id": "book",
+      "label": "Book",
+      "file": "book.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "candle",
+      "label": "Candle",
+      "file": "candle.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "cherries",
+      "label": "Cherries",
+      "file": "cherries.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    },
+    {
+      "id": "cloud",
+      "label": "Cloud",
+      "file": "cloud.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "cookie",
+      "label": "Cookie",
+      "file": "cookie.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "daisy",
+      "label": "Daisy",
+      "file": "daisy.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "feather",
+      "label": "Feather",
+      "file": "feather.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    },
+    {
+      "id": "fish",
+      "label": "Fish",
+      "file": "fish.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "heart",
+      "label": "Heart",
+      "file": "heart.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "house",
+      "label": "House",
+      "file": "house.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "key",
+      "label": "Key",
+      "file": "key.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "leaf",
+      "label": "Leaf",
+      "file": "leaf.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "mitten",
+      "label": "Mitten",
+      "file": "mitten.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "moon",
+      "label": "Moon",
+      "file": "moon.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "mug",
+      "label": "Mug",
+      "file": "mug.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "mushroom",
+      "label": "Mushroom",
+      "file": "mushroom.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "pine",
+      "label": "Pine tree",
+      "file": "pine.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "pumpkin",
+      "label": "Pumpkin",
+      "file": "pumpkin.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    },
+    {
+      "id": "robin",
+      "label": "Robin",
+      "file": "robin.svg",
+      "inPrototype": true,
+      "usableAsToken": true
+    },
+    {
+      "id": "snowflake",
+      "label": "Snowflake",
+      "file": "snowflake.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "sock",
+      "label": "Sock",
+      "file": "sock.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    },
+    {
+      "id": "star",
+      "label": "Star",
+      "file": "star.svg",
+      "inPrototype": true,
+      "usableAsToken": false
+    },
+    {
+      "id": "umbrella",
+      "label": "Umbrella",
+      "file": "umbrella.svg",
+      "inPrototype": false,
+      "usableAsToken": false
+    }
+  ]
+}

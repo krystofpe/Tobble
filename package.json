@@ -1,0 +1,23 @@
+{
+  "name": "symbol-duel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Asynchronous symbol-matching duel in one HTML file, with a shared Supabase scoreboard.",
+  "type": "module",
+  "scripts": {
+    "serve": "node tests/helpers/serve.mjs",
+    "test": "node tests/run-all.mjs",
+    "test:cards": "node tests/cards.test.mjs",
+    "test:demo": "node tests/demo.test.mjs",
+    "test:sql": "node tests/sql.test.mjs",
+    "test:flow": "node tests/supabase-flow.test.mjs"
+  },
+  "devDependencies": {
+    "embedded-postgres": "17.12.0-beta.19",
+    "pg": "^8.13.0",
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
