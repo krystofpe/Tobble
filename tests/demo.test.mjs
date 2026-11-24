@@ -73,7 +73,7 @@ try {
   assert.ok(Math.abs(clock - expected) < 0.8, `clock ${clock} should be about ${expected.toFixed(1)}`);
   await playDuel(page, { from: 3 });
   await page.waitForSelector('.result .bigtime');
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('symbolduel:demo')));
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('tobble:demo')));
   const last = stored.results.at(-1);
   assert.equal(last.splits.length, 10);
   assert.equal(last.splits.reduce((a, b) => a + b, 0), last.finishedAt - last.startedAt);
@@ -82,10 +82,10 @@ try {
 
   // a duel started more than 10 minutes ago is closed as "out of time"
   await page.evaluate(() => {
-    const d = JSON.parse(localStorage.getItem('symbolduel:demo'));
+    const d = JSON.parse(localStorage.getItem('tobble:demo'));
     d.duels.push({ id: 'oldduel', seed: 42, createdAt: Date.now() - 3600e3, createdBy: 'Vanda' });
     d.results.push({ id: 'oldduel_petr', duelId: 'oldduel', key: 'petr', name: 'Petr', startedAt: Date.now() - 1800e3 });
-    localStorage.setItem('symbolduel:demo', JSON.stringify(d));
+    localStorage.setItem('tobble:demo', JSON.stringify(d));
   });
   await page.reload();
   await page.waitForSelector('text=out of time');

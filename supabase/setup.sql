@@ -1,21 +1,21 @@
--- Symbol Duel: shared scoreboard. Run this once in the Supabase SQL Editor.
--- Everything it creates starts with "symbol_", so it is safe in an existing project,
+-- Tobble: shared scoreboard. Run this once in the Supabase SQL Editor.
+-- Everything it creates starts with "tobble_", so it is safe in an existing project,
 -- and running it again does no harm.
 --
 -- The game never reads or writes the tables directly. It calls the three functions
 -- below, which check every value and refuse to change a finished result.
 
-create table if not exists public.symbol_duels (
+create table if not exists public.tobble_duels (
   id         text primary key check (id ~ '^[a-z0-9]{8,24}$'),
   room       text not null check (room ~ '^[a-z0-9]{16,40}$'),
   seed       integer not null check (seed >= 0),
   created_by text not null check (char_length(created_by) between 1 and 40),
   created_at timestamptz not null default now()
 );
-create index if not exists symbol_duels_room on public.symbol_duels (room);
+create index if not exists tobble_duels_room on public.tobble_duels (room);
 
-create table if not exists public.symbol_results (
-  duel_id     text not null references public.symbol_duels (id) on delete cascade,
+create table if not exists public.tobble_results (
+  duel_id     text not null references public.tobble_duels (id) on delete cascade,
   player_key  text not null check (char_length(player_key) between 1 and 60),
   room        text not null,
   name        text not null check (char_length(name) between 1 and 40),
@@ -25,17 +25,18 @@ create table if not exists public.symbol_results (
   mistakes    integer not null default 0 check (mistakes >= 0),
   splits      integer[] not null default '{}' check (cardinality(splits) <= 10),
   dnf         boolean not null default false,
+  token       text check (token ~ '^[a-z]{2,12}$'),
   primary key (duel_id, player_key)
 );
-create index if not exists symbol_results_room on public.symbol_results (room);
+create index if not exists tobble_results_room on public.tobble_results (room);
 
 -- Lock the tables: row level security with no policies, and no table rights for API users.
-alter table public.symbol_duels enable row level security;
-alter table public.symbol_results enable row level security;
-revoke all on public.symbol_duels, public.symbol_results from anon, authenticated;
+alter table public.tobble_duels enable row level security;
+alter table public.tobble_results enable row level security;
+revoke all on public.tobble_duels, public.tobble_results from anon, authenticated;
 
 -- Everything stored for one game. A game is found only by its unguessable id.
-create or replace function public.symbol_duel_room(p_room text)
+create or replace function public.tobble_room(p_room text)
 returns jsonb
 language plpgsql stable security definer set search_path = ''
 as $$
@@ -49,19 +50,19 @@ begin
                'id', d.id, 'seed', d.seed, 'createdBy', d.created_by,
                'createdAt', floor(extract(epoch from d.created_at) * 1000)::bigint)
              order by d.created_at, d.id)
-      from public.symbol_duels d where d.room = p_room), '[]'::jsonb),
+      from public.tobble_duels d where d.room = p_room), '[]'::jsonb),
     'results', coalesce((
       select jsonb_agg(jsonb_build_object(
                'id', r.duel_id || '_' || r.player_key, 'duelId', r.duel_id,
                'key', r.player_key, 'name', r.name,
                'startedAt', r.started_at, 'finishedAt', r.finished_at, 'timeMs', r.time_ms,
-               'mistakes', r.mistakes, 'splits', to_jsonb(r.splits), 'dnf', r.dnf))
-      from public.symbol_results r where r.room = p_room), '[]'::jsonb));
+               'mistakes', r.mistakes, 'splits', to_jsonb(r.splits), 'dnf', r.dnf, 'token', r.token))
+      from public.tobble_results r where r.room = p_room), '[]'::jsonb));
 end;
 $$;
 
 -- A new duel. Duels are never changed or deleted.
-create or replace function public.symbol_duel_create(p_room text, p_id text, p_seed integer, p_created_by text)
+create or replace function public.tobble_new_duel(p_room text, p_id text, p_seed integer, p_created_by text)
 returns void
 language plpgsql security definer set search_path = ''
 as $$
@@ -69,13 +70,13 @@ begin
   if p_room is null or p_room !~ '^[a-z0-9]{16,40}$' then
     raise exception 'Unknown game.';
   end if;
-  if (select count(*) from public.symbol_duels d where d.room = p_room) >= 5000 then
+  if (select count(*) from public.tobble_duels d where d.room = p_room) >= 5000 then
     raise exception 'This game has reached its limit of 5000 duels.';
   end if;
-  insert into public.symbol_duels (id, room, seed, created_by)
+  insert into public.tobble_duels (id, room, seed, created_by)
   values (p_id, p_room, p_seed, btrim(p_created_by))
   on conflict (id) do nothing;
-  if not exists (select 1 from public.symbol_duels d where d.id = p_id and d.room = p_room) then
+  if not exists (select 1 from public.tobble_duels d where d.id = p_id and d.room = p_room) then
     raise exception 'That duel id is already in use.';
   end if;
 end;
@@ -83,7 +84,7 @@ $$;
 
 -- One player's result for one duel: stored when the clock starts, completed at the finish.
 -- A result with a finish time is final.
-create or replace function public.symbol_duel_save_result(p_room text, p_result jsonb)
+create or replace function public.tobble_save_result(p_room text, p_result jsonb)
 returns void
 language plpgsql security definer set search_path = ''
 as $$
@@ -92,12 +93,13 @@ declare
   v_key      text := p_result ->> 'key';
   v_name     text := btrim(p_result ->> 'name');
   v_dnf      boolean := coalesce(p_result -> 'dnf' = 'true'::jsonb, false);
+  v_token    text := nullif(p_result ->> 'token', '');
   v_started  bigint;
   v_finished bigint;
   v_time     integer;
   v_mistakes integer := 0;
   v_splits   integer[] := '{}';
-  v_old      public.symbol_results;
+  v_old      public.tobble_results;
 begin
   if p_room is null or p_room !~ '^[a-z0-9]{16,40}$' then
     raise exception 'Unknown game.';
@@ -105,7 +107,7 @@ begin
   if jsonb_typeof(p_result) is distinct from 'object' then
     raise exception 'A result must be an object.';
   end if;
-  if not exists (select 1 from public.symbol_duels d where d.id = v_duel and d.room = p_room) then
+  if not exists (select 1 from public.tobble_duels d where d.id = v_duel and d.room = p_room) then
     raise exception 'Unknown duel.';
   end if;
   if jsonb_typeof(p_result -> 'startedAt') is distinct from 'number' then
@@ -134,17 +136,20 @@ begin
       from jsonb_array_elements(p_result -> 'splits') with ordinality as t(e, n);
   end if;
   v_dnf := v_dnf and v_finished is not null;
+  if v_token is not null and v_token !~ '^[a-z]{2,12}$' then
+    raise exception 'Unknown token.';
+  end if;
 
-  select * into v_old from public.symbol_results r
+  select * into v_old from public.tobble_results r
    where r.duel_id = v_duel and r.player_key = v_key
    for update;
   if not found then
-    if (select count(*) from public.symbol_results r where r.duel_id = v_duel) >= 10 then
+    if (select count(*) from public.tobble_results r where r.duel_id = v_duel) >= 10 then
       raise exception 'This duel already has 10 players.';
     end if;
-    insert into public.symbol_results
-      (duel_id, player_key, room, name, started_at, finished_at, time_ms, mistakes, splits, dnf)
-    values (v_duel, v_key, p_room, v_name, v_started, v_finished, v_time, v_mistakes, v_splits, v_dnf);
+    insert into public.tobble_results
+      (duel_id, player_key, room, name, started_at, finished_at, time_ms, mistakes, splits, dnf, token)
+    values (v_duel, v_key, p_room, v_name, v_started, v_finished, v_time, v_mistakes, v_splits, v_dnf, v_token);
   elsif v_old.finished_at is not null then
     if v_old.finished_at = v_finished and v_old.time_ms is not distinct from v_time then
       return;  -- the same final result sent twice
@@ -153,20 +158,20 @@ begin
   elsif v_old.started_at <> v_started then
     raise exception 'The start time cannot change.';
   else
-    update public.symbol_results
+    update public.tobble_results
        set name = v_name, finished_at = v_finished, time_ms = v_time,
-           mistakes = v_mistakes, splits = v_splits, dnf = v_dnf
+           mistakes = v_mistakes, splits = v_splits, dnf = v_dnf, token = coalesce(v_token, token)
      where duel_id = v_duel and player_key = v_key;
   end if;
 end;
 $$;
 
 -- Only these three functions are reachable with the publishable key.
-revoke all on function public.symbol_duel_room(text) from public, anon, authenticated;
-revoke all on function public.symbol_duel_create(text, text, integer, text) from public, anon, authenticated;
-revoke all on function public.symbol_duel_save_result(text, jsonb) from public, anon, authenticated;
-grant execute on function public.symbol_duel_room(text) to anon, authenticated;
-grant execute on function public.symbol_duel_create(text, text, integer, text) to anon, authenticated;
-grant execute on function public.symbol_duel_save_result(text, jsonb) to anon, authenticated;
+revoke all on function public.tobble_room(text) from public, anon, authenticated;
+revoke all on function public.tobble_new_duel(text, text, integer, text) from public, anon, authenticated;
+revoke all on function public.tobble_save_result(text, jsonb) from public, anon, authenticated;
+grant execute on function public.tobble_room(text) to anon, authenticated;
+grant execute on function public.tobble_new_duel(text, text, integer, text) to anon, authenticated;
+grant execute on function public.tobble_save_result(text, jsonb) to anon, authenticated;
 
 notify pgrst, 'reload schema';

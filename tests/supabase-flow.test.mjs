@@ -37,7 +37,7 @@ try {
   };
   const A = await player('A'), B = await player('B');
   const roomChecks = [];
-  A.page.on('request', r => { if (r.url().endsWith('/rpc/symbol_duel_room')) roomChecks.push(Date.now()); });
+  A.page.on('request', r => { if (r.url().endsWith('/rpc/tobble_room')) roomChecks.push(Date.now()); });
 
   // A creates a game; B joins with the invite link
   await A.page.goto(site.url);
@@ -80,7 +80,7 @@ try {
   await btn(A.page, 'Back to all duels').click(); await btn(B.page, 'Back to all duels').click();
   await A.page.locator('section:has(h2:text("Scoreboard")) tbody tr').nth(1).waitFor();
   await A.page.screenshot({ path: shot('supabase-lobby.png'), fullPage: true });
-  const rows = (await admin.query('select player_key, time_ms, cardinality(splits) as n, dnf, finished_at is not null as done from public.symbol_results where room = $1', [room])).rows;
+  const rows = (await admin.query('select player_key, time_ms, cardinality(splits) as n, dnf, finished_at is not null as done from public.tobble_results where room = $1', [room])).rows;
   assert.equal(rows.length, 2);
   assert.ok(rows.every(r => r.done && r.n === 10 && !r.dnf));
   assert.ok(Math.abs(rows.find(r => r.player_key === 'vanda').time_ms - parseFloat(timeA) * 1000) <= 5, 'stored time matches the screen');
@@ -120,7 +120,7 @@ try {
   watchErrors(A2, errors, 'A2');
   await A2.goto(link);
   await A2.waitForFunction(t => document.querySelector('#app').textContent.includes(t), lostTime);
-  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('symbolduel:local:'))
+  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('tobble:local:'))
     .every(([, v]) => Object.keys(JSON.parse(v).final).length === 0));
   await B.page.waitForSelector('text=2 duels are waiting for you');
   console.log('closed tab while offline: delivered after reopening');
@@ -132,26 +132,26 @@ try {
   await A2.waitForTimeout(500);
   const shiftMs = 11 * 60 * 1000;   // pretend it started 11 minutes ago, in the browser and in the database
   await A2.evaluate(shift => {
-    for (const [k, v] of Object.entries(localStorage)) if (k.startsWith('symbolduel:local:')){
+    for (const [k, v] of Object.entries(localStorage)) if (k.startsWith('tobble:local:')){
       const d = JSON.parse(v); for (const p of Object.values(d.prog)) p.startedAt -= shift; localStorage.setItem(k, JSON.stringify(d));
     }
   }, shiftMs);
-  await admin.query('update public.symbol_results set started_at = started_at - $2 where room = $1 and finished_at is null', [room, shiftMs]);
+  await admin.query('update public.tobble_results set started_at = started_at - $2 where room = $1 and finished_at is null', [room, shiftMs]);
   A2.once('dialog', d => d.accept());
   await A2.reload();
   await A2.waitForSelector('text=out of time', { timeout: 8000 });
-  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('symbolduel:local:'))
+  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('tobble:local:'))
     .every(([, v]) => Object.keys(JSON.parse(v).final).length === 0), null, { timeout: 8000 });
-  const dnf = (await admin.query('select time_ms, finished_at - started_at as took from public.symbol_results where room = $1 and dnf', [room])).rows;
+  const dnf = (await admin.query('select time_ms, finished_at - started_at as took from public.tobble_results where room = $1 and dnf', [room])).rows;
   assert.equal(dnf.length, 1); assert.equal(dnf[0].time_ms, null); assert.equal(Number(dnf[0].took), 600000);
   console.log('abandoned duel: stored as out of time after 10 minutes');
 
   // another device already stored a different result: the stored one wins and the local copy is dropped
   await finishOffline(A.ctx, A2);
-  const { duel_id } = (await admin.query("select duel_id from public.symbol_results where room = $1 and player_key = 'vanda' and finished_at is null", [room])).rows[0];
-  await admin.query("update public.symbol_results set finished_at = started_at + 7777, time_ms = 7777, splits = '{777}' where duel_id = $1 and player_key = 'vanda'", [duel_id]);
+  const { duel_id } = (await admin.query("select duel_id from public.tobble_results where room = $1 and player_key = 'vanda' and finished_at is null", [room])).rows[0];
+  await admin.query("update public.tobble_results set finished_at = started_at + 7777, time_ms = 7777, splits = '{777}' where duel_id = $1 and player_key = 'vanda'", [duel_id]);
   await A.ctx.setOffline(false);
-  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('symbolduel:local:'))
+  await A2.waitForFunction(() => Object.entries(localStorage).filter(([k]) => k.startsWith('tobble:local:'))
     .every(([, v]) => Object.keys(JSON.parse(v).final).length === 0), null, { timeout: 10000 });
   await btn(A2, 'Back to all duels').click();
   await A2.waitForSelector('text=7.78 s');
@@ -192,7 +192,7 @@ try {
   console.log('error notes (paused, not set up, wrong key, incomplete settings) and both key types work');
 
   const used = [...new Set(api.ctl.calls.map(c => c.fn))].sort();
-  assert.deepEqual(used, ['symbol_duel_create', 'symbol_duel_room', 'symbol_duel_save_result']);
+  assert.deepEqual(used, ['tobble_new_duel', 'tobble_room', 'tobble_save_result']);
   assert.deepEqual(errors, [], 'no page errors');
   console.log(`requests to the scoreboard: ${api.ctl.calls.length}, only the three setup functions`);
   console.log('SUPABASE FLOW TESTS PASSED');

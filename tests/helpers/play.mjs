@@ -49,7 +49,7 @@ export async function playDuel(page, { from = 0, stopAfter = 10, wrongAt = -1 } 
 
 // Number of finished results this browser is still holding because the scoreboard has not confirmed them.
 export function unsavedCount(page){
-  return page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.startsWith('symbolduel:local:'))
+  return page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.startsWith('tobble:local:'))
     .reduce((n, [, v]) => n + Object.keys(JSON.parse(v).final).length, 0));
 }
 

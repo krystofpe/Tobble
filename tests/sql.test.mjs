@@ -15,11 +15,11 @@ async function check(db){
     try { const r = await c.query(sql, params); await c.query('commit'); return { ok: true, rows: r.rows }; }
     catch (e){ await c.query('rollback'); return { ok: false, code: e.code, msg: e.message }; }
   };
-  const room = (r = ROOM) => as('anon', 'select public.symbol_duel_room($1::text) as v', [r]);
+  const room = (r = ROOM) => as('anon', 'select public.tobble_room($1::text) as v', [r]);
   const create = (id, seed = 123, by = 'Vanda', r = ROOM) =>
-    as('anon', 'select public.symbol_duel_create(p_room := $1::text, p_id := $2::text, p_seed := $3::integer, p_created_by := $4::text)', [r, id, seed, by]);
+    as('anon', 'select public.tobble_new_duel(p_room := $1::text, p_id := $2::text, p_seed := $3::integer, p_created_by := $4::text)', [r, id, seed, by]);
   const save = (result, r = ROOM) =>
-    as('anon', 'select public.symbol_duel_save_result(p_room := $1::text, p_result := $2::jsonb)', [r, JSON.stringify(result)]);
+    as('anon', 'select public.tobble_save_result(p_room := $1::text, p_result := $2::jsonb)', [r, JSON.stringify(result)]);
   const expect = (label, outcome, allowed) => {
     const pass = outcome.ok === allowed;
     if (!pass) wrong++;
@@ -38,12 +38,15 @@ async function check(db){
   expect('send the same finish again (lost reply)', await save(fin), true);
   expect('second player finishes in one go', await save({ duelId: DUEL, key: 'petr', name: 'Petr', startedAt: 5, finishedAt: 9005, timeMs: 9000, mistakes: 0, splits: [900] }), true);
   expect('out-of-time result (no time)', await save({ duelId: DUEL, key: 'eva', name: 'Eva', startedAt: 5, finishedAt: 600005, dnf: true }), true);
+  expect('result with a token', await save({ duelId: DUEL, key: 'jan', name: 'Jan', startedAt: 7, token: 'robin' }), true);
+  expect('finish it without repeating the token', await save({ duelId: DUEL, key: 'jan', name: 'Jan', startedAt: 7, finishedAt: 9007, timeMs: 9000 }), true);
   const data = (await room()).rows[0].v;
   assert.equal(data.duels.length, 1);
-  assert.equal(data.results.length, 3);
+  assert.equal(data.results.length, 4);
   const v = data.results.find(r => r.key === 'vanda');
-  assert.deepEqual([v.id, v.timeMs, v.mistakes, v.splits.length, v.dnf], [`${DUEL}_vanda`, 12000, 1, 10, false]);
+  assert.deepEqual([v.id, v.timeMs, v.mistakes, v.splits.length, v.dnf, v.token], [`${DUEL}_vanda`, 12000, 1, 10, false, null]);
   assert.equal(data.results.find(r => r.key === 'eva').dnf, true);
+  assert.equal(data.results.find(r => r.key === 'jan').token, 'robin', 'the token is kept when the finish leaves it out');
   assert.ok(Math.abs(data.duels[0].createdAt - Date.now()) < 60000, 'createdAt is server time in ms');
 
   // what must be refused
@@ -60,7 +63,9 @@ async function check(db){
   expect('20 splits', await save({ duelId: DUEL, key: 'x', name: 'X', startedAt: 1, splits: Array(20).fill(1) }), false);
   expect('text in splits', await save({ duelId: DUEL, key: 'x', name: 'X', startedAt: 1, splits: ['<b>'] }), false);
   expect('negative time', await save({ duelId: DUEL, key: 'x', name: 'X', startedAt: 1, finishedAt: 2, timeMs: -5 }), false);
-  expect('result that is not an object', await as('anon', `select public.symbol_duel_save_result('${ROOM}', '[1,2]'::jsonb)`), false);
+  expect('markup as a token', await save({ duelId: DUEL, key: 'x', name: 'X', startedAt: 1, token: '<b>' }), false);
+  expect('very long token', await save({ duelId: DUEL, key: 'x', name: 'X', startedAt: 1, token: 'a'.repeat(40) }), false);
+  expect('result that is not an object', await as('anon', `select public.tobble_save_result('${ROOM}', '[1,2]'::jsonb)`), false);
   expect('duel with a bad id', await create('<script>'), false);
   expect('duel with a negative seed', await create('duelbbbb2222', -4), false);
   expect('duel with a 100-character creator name', await create('duelcccc3333', 1, 'Q'.repeat(100)), false);
@@ -69,11 +74,11 @@ async function check(db){
   expect('read a short, guessable game id', await room('abc'), false);
   expect('read another game: sees nothing of this one', { ok: (await room(OTHER)).rows[0].v.duels.length === 0 }, true);
   for (const role of ['anon', 'authenticated']){
-    expect(`${role}: read the results table directly`, await as(role, 'select * from public.symbol_results'), false);
-    expect(`${role}: read the duels table directly`, await as(role, 'select * from public.symbol_duels'), false);
-    expect(`${role}: insert into the results table directly`, await as(role, `insert into public.symbol_results (duel_id, player_key, room, name, started_at) values ('${DUEL}','h','${ROOM}','H',1)`), false);
-    expect(`${role}: update the results table directly`, await as(role, 'update public.symbol_results set time_ms = 1'), false);
-    expect(`${role}: delete from the duels table directly`, await as(role, 'delete from public.symbol_duels'), false);
+    expect(`${role}: read the results table directly`, await as(role, 'select * from public.tobble_results'), false);
+    expect(`${role}: read the duels table directly`, await as(role, 'select * from public.tobble_duels'), false);
+    expect(`${role}: insert into the results table directly`, await as(role, `insert into public.tobble_results (duel_id, player_key, room, name, started_at) values ('${DUEL}','h','${ROOM}','H',1)`), false);
+    expect(`${role}: update the results table directly`, await as(role, 'update public.tobble_results set time_ms = 1'), false);
+    expect(`${role}: delete from the duels table directly`, await as(role, 'delete from public.tobble_duels'), false);
   }
   const accepted = [];
   for (let i = 0; i < 12; i++) accepted.push((await save({ duelId: DUEL, key: 'p' + i, name: 'P' + i, startedAt: 1 })).ok);

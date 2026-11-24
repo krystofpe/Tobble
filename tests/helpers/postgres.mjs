@@ -39,7 +39,7 @@ export async function startPostgres(){
   const setupSql = checkSetupSqlInSync();
   const port = await freePort();
   const server = new EmbeddedPostgres({
-    databaseDir: fs.mkdtempSync(path.join(os.tmpdir(), 'symbol-duel-pg-')),
+    databaseDir: fs.mkdtempSync(path.join(os.tmpdir(), 'tobble-pg-')),
     user: 'postgres', password: PASSWORDS.postgres, port, persistent: false,
     // Postgres refuses to run as root; only relevant inside containers.
     createPostgresUser: typeof process.getuid === 'function' && process.getuid() === 0,
@@ -81,7 +81,7 @@ export async function startPostgres(){
     config,
     // A connected pg.Client; the caller ends it.
     async client(database, user = 'tester'){ const c = new pg.Client(config(database, user)); await c.connect(); return c; },
-    async reset(database){ await run(database, 'supa_admin', 'truncate public.symbol_results, public.symbol_duels'); },
+    async reset(database){ await run(database, 'supa_admin', 'truncate public.tobble_results, public.tobble_duels'); },
     stop: () => server.stop(),
   };
 }

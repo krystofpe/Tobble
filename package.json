@@ -1,8 +1,8 @@
 {
-  "name": "symbol-duel",
+  "name": "tobble",
   "version": "0.1.0",
   "private": true,
-  "description": "Asynchronous symbol-matching duel in one HTML file, with a shared Supabase scoreboard.",
+  "description": "Tobble: an asynchronous spot-the-match card game for friends, with a shared Supabase scoreboard.",
   "type": "module",
   "scripts": {
     "serve": "node tests/helpers/serve.mjs",
