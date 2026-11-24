@@ -118,7 +118,7 @@ ul.plain{ margin:0; padding-left:20px; } ul.plain li{ margin-bottom:6px; }
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif;
   display:grid; place-items:center; padding:0; border:0; border-radius:50%; background:none; color:#1c2230; cursor:pointer;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
-.sym span{ display:block; pointer-events:none; }
+.sym img{ display:block; width:100%; height:100%; pointer-events:none; }
 .sym.hit{ box-shadow:0 0 0 4px var(--ok); background:rgba(31,157,107,.2); }
 .sym.hit span{ animation:pulse .35s ease; }
 .sym.miss{ animation:missring .45s ease-out; }
@@ -158,22 +158,25 @@ const POLL_MS = 10000;                 // how often an open game checks for the 
 const PAIRS = 10;                      // card pairs per duel
 const PENALTY_MS = 3000;               // added for every wrong tap
 const TIME_LIMIT_MS = 10 * 60 * 1000;  // a duel left unfinished this long counts as "out of time"
-const ORDER = 7;                       // 7 -> 57 cards with 8 symbols each (must be a prime number)
-
+const PER_CARD = 8;                    // pictures per card
 const TOKENS = ['robin', 'mushroom', 'acorn', 'moon', 'mitten', 'fish'];   // pictures players can pick next to their name
 
+// The 26 pictures in assets/symbols, in the order of symbols.json: [file name, label].
 const SYMBOLS = [
-  ['🍎','apple'],['🍌','banana'],['🍇','grapes'],['🍓','strawberry'],['🍉','watermelon'],['🍍','pineapple'],
-  ['🍒','cherries'],['🥕','carrot'],['🌽','corn'],['🍄','mushroom'],['🌵','cactus'],['🌲','pine tree'],
-  ['🌻','sunflower'],['🍀','clover'],['🔥','fire'],['⚡','lightning'],['❄️','snowflake'],['🌈','rainbow'],
-  ['🌙','moon'],['⭐','star'],['☀️','sun'],['☂️','umbrella'],['🎈','balloon'],['🎁','gift'],
-  ['🎲','dice'],['🎯','target'],['🎸','guitar'],['🎺','trumpet'],['🥁','drum'],['⚽','football'],
-  ['🏀','basketball'],['🚀','rocket'],['✈️','airplane'],['🚗','car'],['🚲','bicycle'],['⛵','sailboat'],
-  ['⚓','anchor'],['🔑','key'],['🔒','padlock'],['💡','light bulb'],['🔔','bell'],['✂️','scissors'],
-  ['🔨','hammer'],['🧲','magnet'],['❤️','heart'],['💎','gem'],['👑','crown'],['👻','ghost'],
-  ['🤖','robot'],['👽','alien'],['🐱','cat'],['🐶','dog'],['🐸','frog'],['🐙','octopus'],
-  ['🦋','butterfly'],['🐢','turtle'],['🐝','bee'],['🐧','penguin'],['🐟','fish'],['🍕','pizza'],
-  ['🍩','doughnut'],['☕','coffee'],['🎩','top hat'],['⏰','alarm clock'],
+  ['acorn','Acorn'],['apple','Apple'],['bell','Bell'],['book','Book'],['candle','Candle'],['cherries','Cherries'],
+  ['cloud','Cloud'],['cookie','Cookie'],['daisy','Daisy'],['feather','Feather'],['fish','Fish'],['heart','Heart'],
+  ['house','House'],['key','Key'],['leaf','Leaf'],['mitten','Mitten'],['moon','Moon'],['mug','Mug'],
+  ['mushroom','Mushroom'],['pine','Pine tree'],['pumpkin','Pumpkin'],['robin','Robin'],['snowflake','Snowflake'],
+  ['sock','Sock'],['star','Star'],['umbrella','Umbrella'],
+];
+const LABEL = Object.fromEntries(SYMBOLS);
+// Where the 8 pictures sit on a card: distance from the centre (r) and size (s) as fractions of the
+// card's diameter, angle (a) in degrees. One picture in the middle and seven around, or three and five.
+const LAYOUTS = [
+  [{ r:0, a:0, s:.25 }, { r:.315, a:0, s:.2 }, { r:.315, a:51.43, s:.17 }, { r:.315, a:102.86, s:.21 },
+   { r:.315, a:154.29, s:.18 }, { r:.315, a:205.71, s:.2 }, { r:.315, a:257.14, s:.17 }, { r:.315, a:308.57, s:.19 }],
+  [{ r:.145, a:0, s:.19 }, { r:.145, a:120, s:.17 }, { r:.145, a:240, s:.2 }, { r:.335, a:36, s:.19 },
+   { r:.335, a:108, s:.21 }, { r:.335, a:180, s:.17 }, { r:.335, a:252, s:.2 }, { r:.335, a:324, s:.18 }],
 ];
 
 const SETUP_SQL = `-- Tobble: shared scoreboard. Run this once in the Supabase SQL Editor.
@@ -372,44 +375,33 @@ function shuffle(list, rnd){
   }
   return list;
 }
-// Finite projective plane of order n: n*n + n + 1 cards, n + 1 symbols per card,
-// and any two cards share exactly one symbol.
-function buildDeck(n){
-  const cards = [];
-  for (let i = 0; i <= n; i++){
-    const card = [0];
-    for (let j = 0; j < n; j++) card.push(1 + i * n + j);
-    cards.push(card);
-  }
-  for (let i = 0; i < n; i++){
-    for (let j = 0; j < n; j++){
-      const card = [i + 1];
-      for (let k = 0; k < n; k++) card.push(n + 1 + n * k + (i * k + j) % n);
-      cards.push(card);
-    }
-  }
-  return cards;
-}
-// One symbol in the middle, the rest on a ring, each with its own size and rotation.
+// A card's look: one of the two layouts, turned by a random spin, each picture with its own tilt.
+// x, y (offset from the centre) and size are fractions of the card's diameter.
 function layoutCard(ids, rnd){
-  const ring = ids.length - 1, turn = rnd() * Math.PI * 2;
+  const slots = LAYOUTS[rnd() < 0.5 ? 0 : 1], spin = Math.floor(rnd() * 360);
   const items = ids.map((id, i) => {
-    if (i === 0){
-      const x = (rnd() - 0.5) * 0.08, y = (rnd() - 0.5) * 0.08;
-      return { id, x, y, size: 0.40 + rnd() * 0.20, rot: Math.floor(rnd() * 360) };
-    }
-    const angle = turn + (i - 1) * 2 * Math.PI / ring, radius = 0.62 + (rnd() - 0.5) * 0.03;
-    return { id, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
-             size: 0.30 + rnd() * 0.16, rot: Math.floor(rnd() * 360) };
+    const slot = slots[i], angle = (slot.a + spin) * Math.PI / 180;
+    return { id, x: slot.r * Math.cos(angle), y: slot.r * Math.sin(angle), size: slot.s, tilt: Math.round(rnd() * 70 - 35) };
   });
   return { ids, items };
 }
-// A duel is a chain of PAIRS + 1 cards: pair k is card k with card k + 1.
+// A duel is a chain of PAIRS + 1 cards: pair k is card k with card k + 1, and they share exactly one picture.
+// Card k + 1 keeps one picture of card k (never the previous answer) and takes the rest from pictures
+// card k does not have. 26 pictures are plenty: a pair needs 2 x 8 - 1 = 15.
 function buildDuel(seed){
-  const rnd = mulberry32(seed >>> 0);
-  const picture = shuffle(SYMBOLS.map((_, i) => i), rnd);
-  const deck = shuffle(buildDeck(ORDER), rnd).slice(0, PAIRS + 1);
-  return deck.map(card => layoutCard(shuffle(card.map(s => picture[s]), rnd), rnd));
+  const rnd = mulberry32(seed >>> 0), all = SYMBOLS.map(s => s[0]), cards = [];
+  for (let k = 0; k <= PAIRS; k++){
+    let ids;
+    if (k === 0) ids = shuffle(all.slice(), rnd).slice(0, PER_CARD);
+    else {
+      const prev = cards[k - 1].ids, older = k > 1 ? cards[k - 2].ids : [];
+      const choices = prev.filter(id => !older.includes(id));
+      const keep = choices[Math.floor(rnd() * choices.length)];
+      ids = shuffle([keep, ...shuffle(all.filter(id => !prev.includes(id)), rnd).slice(0, PER_CARD - 1)], rnd);
+    }
+    cards.push(layoutCard(ids, rnd));
+  }
+  return cards;
 }
 
 /* ─────────────────────────── 3. HELPERS ─────────────────────────── */
@@ -1064,10 +1056,9 @@ function openDuel(id){
   function cardEl(card){
     const el = h('div', { class:'card pop' });
     for (const it of card.items){
-      const [emoji, label] = SYMBOLS[it.id];
-      const btn = h('button', { class:'sym', type:'button', 'aria-label': label, 'data-id': it.id,
-        style:`left:${(50 + it.x * 50).toFixed(2)}%;top:${(50 + it.y * 50).toFixed(2)}%;--s:${it.size.toFixed(3)};--r:${it.rot}deg` },
-        h('span', { 'aria-hidden':'true', text: emoji }));
+      const btn = h('button', { class:'sym', type:'button', 'aria-label': LABEL[it.id], 'data-id': it.id,
+        style:`left:${(50 + it.x * 100).toFixed(2)}%;top:${(50 + it.y * 100).toFixed(2)}%;--s:${(it.size * 2).toFixed(3)};--r:${it.tilt}deg` },
+        h('img', { src:`assets/symbols/${it.id}.svg`, alt:'', draggable:'false' }));
       // React on press, not release, so a tap counts the moment the finger lands.
       btn.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button === 0) pick(it.id, btn); });
       btn.addEventListener('click', e => { if (e.detail === 0) pick(it.id, btn); });   // keyboard
